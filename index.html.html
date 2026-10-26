@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>SPORTX</title>
+<style>
+:root{--bg:#0b1020;--s:#141b2e;--s2:#1f2a47;--t:#f1f5f9;--m:#8b97b1;--a:#f5a524;--b:#2dd4bf}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--t);min-height:100vh;padding-bottom:calc(90px + env(safe-area-inset-bottom))}
+button{font-family:inherit;cursor:pointer}
+.app{max-width:640px;margin:0 auto;padding:calc(22px + env(safe-area-inset-top)) 16px 0}
+h1{font-size:30px;font-weight:800;letter-spacing:-.6px;line-height:1.1}
+h2{font-size:15px;color:var(--m);font-weight:600;margin:24px 0 10px}
+.m{color:var(--m);font-size:14px}
+.card{background:var(--s);border-radius:20px;padding:16px;margin-bottom:10px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.stat{text-align:center}.stat b{display:block;font-size:26px}.stat span{font-size:12px;color:var(--m)}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:16px;font-size:16px;font-weight:700;background:var(--a);color:#1a1200;margin-top:12px}
+.btn.g{background:var(--s2);color:var(--t)}.btn.sm{width:auto;padding:10px 16px;margin:0}
+.btn:active,.ex:active{transform:scale(.97)}
+.hero{display:flex;align-items:center;gap:18px;margin-top:20px;background:linear-gradient(135deg,#1f2a47,#141b2e)}
+.big{font-size:30px;font-weight:800;margin:4px 0 8px}
+.badge{display:inline-block;color:#111;font-weight:700;font-size:13px;padding:4px 12px;border-radius:99px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.chip{border:0;background:var(--s);color:var(--m);padding:10px 16px;border-radius:99px;font-weight:600;white-space:nowrap}
+.chip.on{background:var(--a);color:#1a1200}
+.ex{display:flex;align-items:center;gap:14px;cursor:pointer}.ex b{font-size:16px}
+.ic{font-size:30px;width:44px;text-align:center}.go{margin-left:auto;color:var(--m);font-size:24px}
+.bar{height:10px;background:#ffffff14;border-radius:9px;overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--b),var(--a));border-radius:9px}
+.sp{display:flex;align-items:center;gap:12px}
+.lb{display:flex;gap:12px;padding:11px 8px;border-radius:12px}.lb b{width:30px}.lb span{flex:1}.lb em{font-style:normal;color:var(--m)}
+.lb.you{background:var(--s2);outline:1px solid var(--a)}
+nav{position:fixed;bottom:0;left:0;right:0;background:#141b2ee8;backdrop-filter:blur(14px);border-top:1px solid #ffffff12;padding-bottom:env(safe-area-inset-bottom);z-index:10}
+nav div{display:flex;max-width:640px;margin:0 auto}
+nav button{flex:1;background:0;border:0;color:var(--m);padding:10px 0 8px;font-size:12px;font-weight:600}
+nav button.on{color:var(--a)}nav i{display:block;font-style:normal;font-size:22px;margin-bottom:2px}
+#ses{position:fixed;inset:0;background:var(--bg);z-index:20;display:none;overflow:auto}
+.center{text-align:center;padding-top:14px}.bigic{font-size:76px;margin-top:10px}
+.timer{font-size:76px;font-weight:800;letter-spacing:2px;margin:10px 0 2px;font-variant-numeric:tabular-nums}
+.st{font-weight:700;color:var(--a);margin:6px 0 18px}
+.pop{animation:pop .6s cubic-bezier(.2,1.6,.4,1)}@keyframes pop{from{transform:scale(.3);opacity:0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style></head><body>
+<main id="main" class="app"></main><div id="ses"></div>
+<nav><div>
+<button data-t="home" onclick="go('home')"><i>🏠</i>Inicio</button>
+<button data-t="train" onclick="go('train')"><i>💪</i>Entrenar</button>
+<button data-t="rank" onclick="go('rank')"><i>🏆</i>Ranking</button>
+<button data-t="perfil" onclick="go('perfil')"><i>👤</i>Perfil</button>
+</div></nav>
+<script>
+const URL_API="https://script.google.com/macros/s/AKfycbytMxshOI2B2Z1uUw8PhozdfwrHuAhQ2Th3NUjmJ4cm60Qd0e7VNQr8YvjcpXn0dz4/exec";
+function enviarRegistro(r){
+  if(!URL_API.startsWith("https://"))return;
+  fetch(URL_API,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify(r)}).catch(()=>{});
+}
+const SP={fut:["⚽","Fútbol"],vol:["🏐","Voleibol"],bas:["🏀","Basquetbol"],gen:["💪","General"]};
+// deporte|lugar|ícono|nombre|series|repeticiones|descanso(s)|descripción
+const E=`fut|casa|⚽|Toques de balón en sitio|3|40|30|Mantén el balón cerca y alterna ambos pies.
+fut|casa|🪜|Escalera de coordinación|4|6|30|Pasos rápidos sobre una escalera dibujada en el piso.
+fut|casa|🔁|Cambios de dirección con conos|4|6|45|Frena, empuja y sal; baja el centro de gravedad.
+fut|gym|🏃|Sprints de 20 metros|4|4|60|Arranque explosivo y recuperación caminando.
+fut|gym|🦵|Sentadilla búlgara|3|10|60|Pierna trasera elevada y tronco firme.
+vol|casa|🦘|Saltos de bloqueo|4|8|45|Brazos arriba y aterrizaje suave con rodillas flexionadas.
+vol|casa|🙌|Golpeo de antebrazo en pared|3|20|30|Postura baja, brazos juntos y contacto en el antebrazo.
+vol|gym|💪|Press de hombro|3|10|60|Abdomen firme; sube sin arquear la espalda.
+vol|gym|🏋️|Sentadilla con salto|4|8|60|Baja controlado y salta lo más alto posible.
+bas|casa|🏀|Dribleo en cuadro|4|30|30|Alterna manos con la cabeza arriba.
+bas|casa|⚡|Defensa lateral|4|10|30|Desplázate de lado sin cruzar los pies.
+bas|gym|🔥|Zancadas con salto|3|10|60|Cambia de pierna en el aire.
+bas|gym|🧱|Peso muerto rumano|3|10|60|Espalda recta y cadera hacia atrás.
+gen|casa|💪|Lagartijas|3|12|45|Cuerpo recto, baja el pecho hasta casi tocar el piso.
+gen|casa|🦵|Sentadilla|3|15|45|Rodillas alineadas con los pies, espalda neutra.
+gen|casa|🧘|Plancha (segundos)|3|30|30|Codos bajo los hombros, abdomen apretado.
+gen|casa|🤸|Jumping Jacks|3|25|30|Salta abriendo piernas y brazos a la vez.
+gen|casa|🏃|Rodillas altas|3|30|30|Sube las rodillas a la altura de la cadera.
+gen|gym|🏋️|Press de banca|4|10|75|Baja la barra al pecho y empuja sin rebotar.
+gen|gym|🧗|Dominadas asistidas|3|8|75|Sube hasta pasar la barbilla de la barra.
+gen|gym|🚣|Remo con barra|3|10|60|Tronco inclinado, lleva la barra al abdomen.
+gen|gym|🦿|Prensa de pierna|3|12|60|Empuja con los talones sin bloquear las rodillas.
+gen|gym|💪|Curl de bíceps|3|12|45|Codos pegados al cuerpo y movimiento lento.
+gen|gym|🏃|Caminadora por intervalos|5|1|60|Un minuto rápido y uno suave en cada serie.`.split("\n").map(l=>{const a=l.split("|");return{sp:a[0],pl:a[1],ic:a[2],n:a[3],s:+a[4],r:+a[5],d:+a[6],t:a[7]}});
+const RK=[["Bronce",0,"#cd7f32"],["Plata",300,"#c0c8d8"],["Oro",800,"#f5a524"],["Platino",1600,"#2dd4bf"],["Diamante",3000,"#60a5fa"],["Élite",5000,"#c084fc"]];
+const DEMO=[["Valeria M.",4120],["Diego R.",3380],["Camila T.",2650],["Andrés L.",1900],["Sofía P.",1240],["Mateo G.",720],["Lucía H.",410]];
+const fresh=()=>({r:[],xp:{fut:0,vol:0,bas:0,gen:0},name:"Atleta"});
+let S=JSON.parse(localStorage.getItem("sportx2")||"null")||fresh(),tab="home",fs="all",fp="all",q=null,tm=null,dp=null;
+const $=id=>document.getElementById(id),save=()=>localStorage.setItem("sportx2",JSON.stringify(S));
+const esc=s=>String(s).replace(/[<>&"']/g,c=>"&#"+c.charCodeAt(0)+";");
+const tot=()=>Object.values(S.xp).reduce((a,b)=>a+b,0),lv=x=>Math.floor(x/200)+1;
+const rk=x=>{let i=0;RK.forEach((r,j)=>{if(x>=r[1])i=j});return i};
+const mm=s=>String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+const hoy=()=>new Date().toLocaleDateString("sv-SE");
+function streak(){const ds=new Set(S.r.map(r=>r.d));let c=0,d=new Date();if(!ds.has(hoy()))d.setDate(d.getDate()-1);
+while(ds.has(d.toLocaleDateString("sv-SE"))){c++;d.setDate(d.getDate()-1)}return c}
+const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+function instBlock(){if(standalone)return"";if(dp)return'<button class="btn g" onclick="inst()">📲 Instalar la app</button>';
+if(/iphone|ipad/i.test(navigator.userAgent))return'<div class="card m" style="margin-top:12px">Para instalarla en iPhone o iPad: toca Compartir y elige “Agregar a pantalla de inicio”.</div>';return""}
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;go(tab)});
+const inst=()=>{dp.prompt();dp=null;go(tab)};
+function go(t){tab=t;document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));({home,train,rank,perfil})[t]();scrollTo(0,0)}
+function home(){const x=tot(),i=rk(x),p=(x%200)/200;
+$("main").innerHTML=`<h1>Hola, ${esc(S.name)}</h1><p class="m" style="margin-top:6px">${navigator.onLine?"Con conexión":"Sin conexión: todo sigue funcionando"}</p>
+<div class="card hero"><svg width="112" height="112" viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="#ffffff14" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="#f5a524" stroke-width="10" stroke-linecap="round" stroke-dasharray="${p*326.7} 326.7" transform="rotate(-90 60 60)"/><text x="60" y="68" text-anchor="middle" fill="#fff" font-size="28" font-weight="800">${lv(x)}</text></svg>
+<div><div class="m">Nivel ${lv(x)}</div><div class="big">${x} XP</div><span class="badge" style="background:${RK[i][2]}">${RK[i][0]}</span></div></div>
+<div class="row"><div class="card stat"><b>${streak()}</b><span>Días de racha</span></div><div class="card stat"><b>${S.r.length}</b><span>Sesiones</span></div><div class="card stat"><b>${Math.round(S.r.reduce((a,r)=>a+r.t,0)/60)}</b><span>Minutos</span></div></div>
+<button class="btn" onclick="go('train')">Entrenar ahora</button>${instBlock()}`}
+function train(){const L=E.map((e,i)=>[e,i]).filter(([e])=>(fs=="all"||e.sp==fs)&&(fp=="all"||e.pl==fp));
+const ch=(a,c,f)=>a.map(([k,l])=>`<button class="chip ${c==k?"on":""}" onclick="${f}('${k}')">${l}</button>`).join("");
+$("main").innerHTML=`<h1>Entrenar</h1><h2>Deporte</h2><div class="chips">${ch([["all","Todos"],...Object.entries(SP).map(([k,v])=>[k,v[0]+" "+v[1]])],fs,"sf")}</div>
+<h2>Lugar</h2><div class="chips">${ch([["all","Todos"],["casa","🏠 Casa"],["gym","🏋️ Gimnasio"]],fp,"pf")}</div><h2>${L.length} ejercicios</h2>
+${L.map(([e,i])=>`<div class="card ex" onclick="start(${i})"><span class="ic">${e.ic}</span><div><b>${e.n}</b><div class="m">${SP[e.sp][1]}, ${e.pl=="casa"?"en casa":"en gimnasio"}, ${e.s} series de ${e.r}</div></div><span class="go">›</span></div>`).join("")}`}
+const sf=k=>{fs=k;train()},pf=k=>{fp=k;train()};
+function start(i){q={e:E[i],s:1,r:0,t:0,rest:0,run:true};$("ses").style.display="block";clearInterval(tm);tm=setInterval(tick,1000);draw()}
+function tick(){if(!q||!q.run)return;if(q.rest>0){if(--q.rest==0){q.s++;q.r=0;navigator.vibrate&&navigator.vibrate(200)}}else q.t++;draw()}
+function rep(){if(q.rest>0)return;if(++q.r>=q.e.r){if(q.s>=q.e.s)return fin();q.rest=q.e.d}draw()}
+function draw(){const{e,s,r,t,rest}=q;$("ses").innerHTML=`<div class="app"><button class="btn g sm" onclick="quit()">‹ Salir</button><div class="center"><div class="bigic">${e.ic}</div><h1>${e.n}</h1><p class="m" style="margin-top:8px">${e.t}</p>
+<div class="timer">${mm(rest>0?rest:t)}</div><p class="st">${rest>0?"Descansa, la siguiente serie ya viene":q.run?"En marcha":"En pausa"}</p>
+<div class="row"><div class="card stat"><b>${s}/${e.s}</b><span>Serie</span></div><div class="card stat"><b>${r}/${e.r}</b><span>Repetición</span></div></div>
+<button class="btn" onclick="rep()">Repetición hecha</button><button class="btn g" onclick="q.run=!q.run;draw()">${q.run?"Pausar":"Seguir"}</button></div></div>`}
+function fin(){clearInterval(tm);const e=q.e,xp=30+e.s*10,b=tot(),bi=rk(b),bl=lv(b);S.xp[e.sp]+=xp;
+S.r.unshift({n:e.n,ic:e.ic,sp:e.sp,t:q.t,d:hoy(),xp});save();enviarRegistro({jugador:S.name,deporte:SP[e.sp][1],ejercicio:e.n,lugar:e.pl=="casa"?"casa":"gimnasio",xp});const a=tot();q=null;
+$("ses").innerHTML=`<div class="app"><div class="center"><div class="bigic pop">🏆</div><h1>¡Entrenamiento completado!</h1><div class="timer">+${xp} XP</div>
+${lv(a)>bl?`<p class="st">¡Subiste al nivel ${lv(a)}!</p>`:""}${rk(a)>bi?`<p class="st">¡Nuevo rango: ${RK[rk(a)][0]}!</p>`:""}
+<button class="btn" onclick="closeS('rank')">Ver mi ranking</button><button class="btn g" onclick="closeS()">Seguir entrenando</button></div></div>`}
+const closeS=t=>{$("ses").style.display="none";go(t||"train")},quit=()=>{clearInterval(tm);q=null;closeS()};
+function rank(){const x=tot(),i=rk(x),n=RK[i+1];const L=[...DEMO.map(([a,b])=>({n:a,x:b})),{n:esc(S.name)+" (tú)",x,me:1}].sort((a,b)=>b.x-a.x);
+$("main").innerHTML=`<h1>Ranking</h1><div class="card" style="margin-top:18px"><span class="badge" style="background:${RK[i][2]}">${RK[i][0]}</span><div class="big">${x} XP</div>
+<div class="bar"><i style="width:${n?(x-RK[i][1])/(n[1]-RK[i][1])*100:100}%"></i></div><p class="m">${n?`Te faltan ${n[1]-x} XP para ${n[0]}`:"Llegaste al rango máximo"}</p></div>
+<h2>Tu rango en cada deporte</h2>${Object.entries(SP).map(([k,v])=>{const y=S.xp[k],j=rk(y);return`<div class="card sp"><span class="ic">${v[0]}</span><div style="flex:1"><b>${v[1]}</b><div class="m">${y} XP</div></div><span class="badge" style="background:${RK[j][2]}">${RK[j][0]}</span></div>`}).join("")}
+<h2>Top de jugadores (datos de demostración)</h2><div class="card">${L.map((p,k)=>`<div class="lb ${p.me?"you":""}"><b>${["🥇","🥈","🥉"][k]||k+1}</b><span>${p.n}</span><em>${p.x} XP</em></div>`).join("")}</div>`}
+function perfil(){$("main").innerHTML=`<h1>Perfil</h1><div class="card" style="margin-top:18px"><b style="font-size:20px">${esc(S.name)}</b><p class="m" style="margin-top:4px">${S.r.length} entrenamientos, racha de ${streak()} días</p><button class="btn g" onclick="rn()">Cambiar nombre</button></div>${instBlock()}
+<div class="card m" style="margin-top:12px">El inicio de sesión con Google y el ranking en línea llegarán en la próxima versión.</div><h2>Historial</h2>
+${S.r.length?S.r.slice(0,30).map(r=>`<div class="card ex"><span class="ic">${r.ic}</span><div><b>${r.n}</b><div class="m">${r.d}, ${mm(r.t)}, +${r.xp} XP</div></div></div>`).join(""):'<div class="card m">Todavía no hay entrenamientos. Completa el primero para empezar tu historial.</div>'}
+${S.r.length?'<button class="btn g" onclick="del()">Borrar historial y puntos</button>':""}`}
+const rn=()=>{const n=prompt("¿Cómo te llamas?",S.name);if(n&&n.trim()){S.name=n.trim().slice(0,20);save();perfil()}};
+const del=()=>{if(confirm("¿Borrar todo tu historial y tus puntos?")){S=Object.assign(fresh(),{name:S.name});save();perfil()}};
+addEventListener("online",()=>tab=="home"&&home());addEventListener("offline",()=>tab=="home"&&home());
+if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));
+go("home");
+</script></body></html>
