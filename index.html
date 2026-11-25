@@ -43,18 +43,21 @@ nav button.on{color:var(--a)}nav i{display:block;font-style:normal;font-size:22p
 .center{text-align:center;padding-top:14px}.bigic{font-size:76px;margin-top:10px}
 .timer{font-size:76px;font-weight:800;letter-spacing:2px;margin:10px 0 2px;font-variant-numeric:tabular-nums}
 .st{font-weight:700;color:var(--a);margin:6px 0 18px}
+textarea{width:100%;background:var(--s2);border:1px solid #ffffff14;color:var(--t);border-radius:14px;padding:15px;font-size:16px;margin-top:12px;font-family:inherit;resize:none}
 input{width:100%;background:var(--s);border:1px solid #ffffff14;color:var(--t);border-radius:14px;padding:15px;font-size:16px;margin-top:10px}
 input:focus{outline:2px solid var(--a)}
 .err{color:#fb7185;font-size:14px;margin-top:10px;min-height:18px}
 .lnk{background:0;border:0;color:var(--a);font-weight:600;font-size:14px;padding:10px}
 .fr{display:flex;gap:8px}.fr input{margin:0}
+.bg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.bd{text-align:center;padding:12px 4px;border-radius:16px;background:var(--s);font-size:11px;color:var(--m)}.bd i{display:block;font-style:normal;font-size:26px;margin-bottom:4px}.bd.off{opacity:.35;filter:grayscale(1)}
+#pk{position:fixed;inset:0;background:#000b;z-index:25;display:none;align-items:flex-end}.sh{background:var(--s);width:100%;max-width:640px;margin:0 auto;border-radius:24px 24px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom))}.ag{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
 .pop{animation:pop .6s cubic-bezier(.2,1.6,.4,1)}@keyframes pop{from{transform:scale(.3);opacity:0}}
 #tt{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--s2);padding:12px 18px;border-radius:14px;z-index:30;display:none;max-width:90%;font-size:14px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 </style></head><body>
 <main id="main" class="app"></main><div id="ses"></div>
 <div id="auth"><div class="app center"><div class="bigic">🏆</div><h1>SPORTX</h1><p class="m" style="margin-top:10px">Cargando…</p></div></div>
-<div id="tt"></div>
+<div id="tt"></div><div id="pk"></div>
 <nav><div>
 <button data-t="home" onclick="go('home')"><i>🏠</i>Inicio</button>
 <button data-t="train" onclick="go('train')"><i>💪</i>Entrenar</button>
@@ -110,9 +113,9 @@ function toast(m){const t=$("tt");t.textContent=m;t.style.display="block";setTim
 function streak(){const ds=new Set(S.r.map(r=>r.d));let c=0,d=new Date();if(!ds.has(hoy()))d.setDate(d.getDate()-1);
 while(ds.has(d.toLocaleDateString("sv-SE"))){c++;d.setDate(d.getDate()-1)}return c}
 function V(){if(U&&P){const s=P.sportXp||{};return{name:P.displayName||"Atleta",user:P.username,photo:P.photo,xp:{fut:s.futbol||0,vol:s.voleibol||0,bas:s.basquetbol||0,gen:s.general||0},n:P.workouts||0,st:(P.lastDay==hoy()||P.lastDay==ayer())?P.streak||0:0,h:H}}
-return{name:S.name,xp:S.xp,n:S.r.length,st:streak(),h:S.r}}
+return{name:S.name,photo:S.photo,xp:S.xp,n:S.r.length,st:streak(),h:S.r}}
 const tot=()=>Object.values(V().xp).reduce((a,b)=>a+b,0);
-const av=p=>p.photo?`<img src="${esc(p.photo)}" alt="">`:esc(((p.name||"?")[0]||"?").toUpperCase());
+const av=p=>p.photo?(p.photo.startsWith("emoji:")?esc(p.photo.slice(6)):`<img src="${esc(p.photo)}" alt="">`):esc(((p.name||"?")[0]||"?").toUpperCase());
 const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone;
 function instBlock(){if(standalone)return"";if(dp)return'<button class="btn g" onclick="inst()">📲 Instalar la app</button>';
 if(/iphone|ipad/i.test(navigator.userAgent))return'<div class="card m" style="margin-top:12px">Para instalarla en iPhone o iPad: toca Compartir y elige “Agregar a pantalla de inicio”.</div>';return""}
@@ -191,15 +194,45 @@ return`<h2>Agregar amigo</h2><div class="card"><div class="fr"><input id="fu" pl
 ${inc.length?"<h2>Solicitudes</h2>"+inc.map(x=>`<div class="card sp"><span class="av">${av({name:x.other.displayName,photo:x.other.photo})}</span><b style="flex:1">${esc(x.other.displayName)}</b><button class="btn sm" onclick="acc('${x.id}')">Aceptar</button></div>`).join(""):""}`}
 async function addF(){const u=$("fu").value.trim();if(!u)return;try{await C.sendFriendRequest(u);toast("Solicitud enviada a @"+u.toLowerCase())}catch(e){toast(e.message||msg(e))}}
 async function acc(id){try{await C.acceptFriend(id);rank()}catch(e){toast(msg(e))}}
-function perfil(){const v=V(),h=v.h;$("main").innerHTML=`<h1>Perfil</h1><div class="card sp" style="margin-top:18px"><span class="av" style="width:56px;height:56px;font-size:22px">${av(v)}</span><div><b style="font-size:20px">${esc(v.name)}</b><p class="m" style="margin-top:2px">${v.user?"@"+esc(v.user)+", ":""}${v.n} entrenamientos, racha de ${v.st} días</p></div></div>
-<button class="btn g" onclick="rn()">Cambiar nombre</button>${instBlock()}
+function perfil(){const v=V(),h=v.h,x=tot(),r=RK[rk(x)],f=S.pf||{},rc=f.ring||"#f5a524",g=f.goal||3;
+const ds=new Set(h.filter(a=>a.d>=new Date(Date.now()-6*864e5).toLocaleDateString("sv-SE")).map(a=>a.d)),wd=ds.size,nsp=Object.values(v.xp).filter(a=>a>0).length;
+const BG=[["🥇","Primer paso",v.n>=1],["🔥","Racha de 3",v.st>=3],["⚡","100 XP",x>=100],["💪","10 sesiones",v.n>=10],["🏅","Nivel 5",lv(x)>=5],["🌟","Rango Oro",rk(x)>=2],["🎯","Meta semanal",wd>=g],["🧩","Multideporte",nsp>=3]];
+$("main").innerHTML=`<h1>Perfil</h1><div class="card" style="margin-top:18px;text-align:center;background:linear-gradient(160deg,${rc}33,#141b2e 70%);border:1px solid ${rc}66">
+<span class="av" style="width:92px;height:92px;font-size:44px;cursor:pointer;box-shadow:0 0 0 4px ${rc}" onclick="pickAv()">${av(v)}</span>
+<div style="font-size:22px;font-weight:800;margin-top:12px">${esc(v.name)}</div><p class="m">${v.user?"@"+esc(v.user):"Modo local"}</p>
+<div style="margin-top:8px"><span class="badge" style="background:${r[2]}">${r[0]}</span> <span class="badge" style="background:#ffffff1f;color:var(--t)">Nivel ${lv(x)}</span>${f.fav?` <span class="badge" style="background:#ffffff1f;color:var(--t)">${SP[f.fav][0]} ${SP[f.fav][1]}</span>`:""}</div>
+${f.motto?`<p style="margin-top:12px;font-style:italic">“${esc(f.motto)}”</p>`:""}${f.bio?`<p class="m" style="margin-top:8px;line-height:1.5">${esc(f.bio)}</p>`:'<p class="m" style="margin-top:12px">Cuéntale a los demás quién eres como deportista.</p>'}</div>
+<div class="row"><div class="card stat"><b>${v.n}</b><span>Entrenamientos</span></div><div class="card stat"><b>${v.st}</b><span>Racha</span></div><div class="card stat"><b>${x}</b><span>XP total</span></div></div>
+<div class="card"><b>Meta semanal</b><div class="bar"><i style="width:${Math.min(100,wd/g*100)}%"></i></div><p class="m">${wd} de ${g} días entrenados en los últimos 7 días${wd>=g?". ¡Meta cumplida!":""}</p></div>
+<h2>Insignias (${BG.filter(b=>b[2]).length} de ${BG.length})</h2><div class="bg">${BG.map(b=>`<div class="bd ${b[2]?"":"off"}"><i>${b[0]}</i>${b[1]}</div>`).join("")}</div>
+<button class="btn" onclick="editPf()">Editar mi perfil</button><button class="btn g" onclick="pickAv()">Cambiar foto</button><button class="btn g" onclick="rn()">Cambiar nombre</button>${instBlock()}
 ${U?`<button class="btn g" onclick="out()">Cerrar sesión</button>`:'<div class="card m" style="margin-top:12px">Estás en modo local. Crea una cuenta para guardar tu XP en la nube y entrar al ranking.</div><button class="btn" onclick="authUI()">Crear cuenta o iniciar sesión</button>'}
 <h2>Historial</h2>${h.length?h.slice(0,30).map(r=>`<div class="card ex"><span class="ic">${r.ic}</span><div><b>${esc(r.n)}</b><div class="m">${r.d}, ${mm(r.t)}, +${r.xp} XP</div></div></div>`).join(""):'<div class="card m">Todavía no hay entrenamientos. Completa el primero para empezar tu historial.</div>'}
 ${v.n?'<button class="btn g" onclick="del()">Borrar historial y puntos</button>':""}`}
+const RC=["#f5a524","#2dd4bf","#60a5fa","#c084fc","#fb7185","#4ade80"];let ed=null;
+function editPf(){ed=Object.assign({bio:"",motto:"",fav:"",goal:3,ring:RC[0]},S.pf||{});edDraw()}
+function edSet(k,v){ed.bio=$("eb").value;ed.motto=$("em2").value;ed[k]=v;edDraw()}
+function edDraw(){$("pk").style.display="flex";$("pk").innerHTML=`<div class="sh" style="max-height:92vh;overflow:auto"><b style="font-size:18px">Editar mi perfil</b>
+<textarea id="eb" maxlength="140" rows="3" placeholder="Sobre mí: cuenta quién eres como deportista">${esc(ed.bio)}</textarea><input id="em2" maxlength="40" placeholder="Tu lema" value="${esc(ed.motto)}">
+<h2>Deporte favorito</h2><div class="chips">${Object.entries(SP).map(([k,s])=>`<button class="chip ${ed.fav==k?"on":""}" onclick="edSet('fav','${k}')">${s[0]} ${s[1]}</button>`).join("")}</div>
+<h2>Meta semanal (días)</h2><div class="chips">${[1,2,3,4,5,6,7].map(d=>`<button class="chip ${ed.goal==d?"on":""}" onclick="edSet('goal',${d})">${d}</button>`).join("")}</div>
+<h2>Color de tu marco</h2><div class="ag">${RC.map(c=>`<button class="av" style="background:${c};border:0;width:40px;height:40px;${ed.ring==c?"outline:3px solid #fff":""}" onclick="edSet('ring','${c}')"></button>`).join("")}</div>
+<button class="btn" onclick="edSave()">Guardar</button><button class="lnk" style="width:100%" onclick="$('pk').style.display='none'">Cancelar</button></div>`}
+function edSave(){ed.bio=$("eb").value.trim();ed.motto=$("em2").value.trim();S.pf=ed;save();$("pk").style.display="none";perfil()}
+const AVS=["😎","🦁","🐯","🦅","🐺","🦈","⚽","🏀","🏐","💪","🔥","🏆"];
+function pickAv(){const p=$("pk");p.style.display="flex";
+p.innerHTML=`<div class="sh"><b style="font-size:18px">Foto de perfil</b><div class="ag">${AVS.map(a=>`<button class="av" style="width:56px;height:56px;font-size:28px;border:0;color:inherit" onclick="setAv('emoji:${a}')">${a}</button>`).join("")}</div>
+<label class="btn" style="text-align:center;margin-top:0">Elegir de la galería<input type="file" accept="image/*" hidden onchange="fromFile(this)"></label>
+<button class="btn g" onclick="setAv('')">Quitar foto</button><button class="lnk" style="width:100%" onclick="$('pk').style.display='none'">Cancelar</button></div>`}
+async function setAv(v){try{if(U){await C.saveProfile({photo:v||null});await refresh()}else{S.photo=v||null;save()}$("pk").style.display="none";perfil()}catch(e){toast(msg(e)||"No se pudo guardar la foto")}}
+function fromFile(inp){const f=inp.files[0];if(!f)return;const im=new Image(),u=URL.createObjectURL(f);
+im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=128;const s=Math.min(im.width,im.height);
+c.getContext("2d").drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,128,128);URL.revokeObjectURL(u);setAv(c.toDataURL("image/jpeg",.8))};
+im.onerror=()=>toast("No se pudo leer esa imagen");im.src=u}
 async function rn(){const n=prompt("¿Cómo te llamas?",V().name);if(!n||!n.trim())return;
 try{if(U){await C.saveProfile({displayName:n.trim().slice(0,20)});await refresh()}else{S.name=n.trim().slice(0,20);save()}perfil()}catch(e){toast(msg(e))}}
 async function del(){if(!confirm("¿Borrar todo tu historial y tus puntos?"))return;
-try{if(U){await C.resetAll();await refresh()}else{S=Object.assign(fresh(),{name:S.name});save()}perfil()}catch(e){toast(msg(e))}}
+try{if(U){await C.resetAll();await refresh()}else{S=Object.assign(fresh(),{name:S.name,photo:S.photo,pf:S.pf});save()}perfil()}catch(e){toast(msg(e))}}
 async function out(){if(!confirm("¿Cerrar sesión?"))return;localStorage.removeItem("sportx_guest");try{await C.logout()}catch(e){toast(msg(e))}}
 addEventListener("online",()=>tab=="home"&&home());addEventListener("offline",()=>tab=="home"&&home());
 if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));
