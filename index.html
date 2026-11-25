@@ -10,7 +10,7 @@
 :root{--bg:#0b1020;--s:#141b2e;--s2:#1f2a47;--t:#f1f5f9;--m:#8b97b1;--a:#f5a524;--b:#2dd4bf}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--t);min-height:100vh;padding-bottom:calc(90px + env(safe-area-inset-bottom))}
-button{font-family:inherit;cursor:pointer}
+button,input{font-family:inherit}button{cursor:pointer}
 .app{max-width:640px;margin:0 auto;padding:calc(22px + env(safe-area-inset-top)) 16px 0}
 h1{font-size:30px;font-weight:800;letter-spacing:-.6px;line-height:1.1}
 h2{font-size:15px;color:var(--m);font-weight:600;margin:24px 0 10px}
@@ -32,26 +32,36 @@ h2{font-size:15px;color:var(--m);font-weight:600;margin:24px 0 10px}
 .bar{height:10px;background:#ffffff14;border-radius:9px;overflow:hidden;margin:6px 0}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--b),var(--a));border-radius:9px}
 .sp{display:flex;align-items:center;gap:12px}
-.lb{display:flex;gap:12px;padding:11px 8px;border-radius:12px}.lb b{width:30px}.lb span{flex:1}.lb em{font-style:normal;color:var(--m)}
+.lb{display:flex;align-items:center;gap:12px;padding:11px 8px;border-radius:12px}.lb b{width:30px}.lb span{flex:1}.lb em{font-style:normal;color:var(--m)}
 .lb.you{background:var(--s2);outline:1px solid var(--a)}
+.av{width:36px;height:36px;border-radius:50%;background:var(--s2);display:inline-flex;align-items:center;justify-content:center;font-weight:800;overflow:hidden;flex:none}.av img{width:100%;height:100%;object-fit:cover}
 nav{position:fixed;bottom:0;left:0;right:0;background:#141b2ee8;backdrop-filter:blur(14px);border-top:1px solid #ffffff12;padding-bottom:env(safe-area-inset-bottom);z-index:10}
 nav div{display:flex;max-width:640px;margin:0 auto}
 nav button{flex:1;background:0;border:0;color:var(--m);padding:10px 0 8px;font-size:12px;font-weight:600}
 nav button.on{color:var(--a)}nav i{display:block;font-style:normal;font-size:22px;margin-bottom:2px}
-#ses{position:fixed;inset:0;background:var(--bg);z-index:20;display:none;overflow:auto}
+#ses,#auth{position:fixed;inset:0;background:var(--bg);z-index:20;overflow:auto}#ses{display:none}
 .center{text-align:center;padding-top:14px}.bigic{font-size:76px;margin-top:10px}
 .timer{font-size:76px;font-weight:800;letter-spacing:2px;margin:10px 0 2px;font-variant-numeric:tabular-nums}
 .st{font-weight:700;color:var(--a);margin:6px 0 18px}
+input{width:100%;background:var(--s);border:1px solid #ffffff14;color:var(--t);border-radius:14px;padding:15px;font-size:16px;margin-top:10px}
+input:focus{outline:2px solid var(--a)}
+.err{color:#fb7185;font-size:14px;margin-top:10px;min-height:18px}
+.lnk{background:0;border:0;color:var(--a);font-weight:600;font-size:14px;padding:10px}
+.fr{display:flex;gap:8px}.fr input{margin:0}
 .pop{animation:pop .6s cubic-bezier(.2,1.6,.4,1)}@keyframes pop{from{transform:scale(.3);opacity:0}}
+#tt{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--s2);padding:12px 18px;border-radius:14px;z-index:30;display:none;max-width:90%;font-size:14px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 </style></head><body>
 <main id="main" class="app"></main><div id="ses"></div>
+<div id="auth"><div class="app center"><div class="bigic">🏆</div><h1>SPORTX</h1><p class="m" style="margin-top:10px">Cargando…</p></div></div>
+<div id="tt"></div>
 <nav><div>
 <button data-t="home" onclick="go('home')"><i>🏠</i>Inicio</button>
 <button data-t="train" onclick="go('train')"><i>💪</i>Entrenar</button>
 <button data-t="rank" onclick="go('rank')"><i>🏆</i>Ranking</button>
 <button data-t="perfil" onclick="go('perfil')"><i>👤</i>Perfil</button>
 </div></nav>
+<script type="module" src="firebase.js"></script>
 <script>
 const URL_API="https://script.google.com/macros/s/AKfycbytMxshOI2B2Z1uUw8PhozdfwrHuAhQ2Th3NUjmJ4cm60Qd0e7VNQr8YvjcpXn0dz4/exec";
 function enviarRegistro(r){
@@ -59,6 +69,7 @@ function enviarRegistro(r){
   fetch(URL_API,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify(r)}).catch(()=>{});
 }
 const SP={fut:["⚽","Fútbol"],vol:["🏐","Voleibol"],bas:["🏀","Basquetbol"],gen:["💪","General"]};
+const GK={fut:"futbol",vol:"voleibol",bas:"basquetbol",gen:"general"};
 // deporte|lugar|ícono|nombre|series|repeticiones|descanso(s)|descripción
 const E=`fut|casa|⚽|Toques de balón en sitio|3|40|30|Mantén el balón cerca y alterna ambos pies.
 fut|casa|🪜|Escalera de coordinación|4|6|30|Pasos rápidos sobre una escalera dibujada en el piso.
@@ -85,29 +96,60 @@ gen|gym|🦿|Prensa de pierna|3|12|60|Empuja con los talones sin bloquear las ro
 gen|gym|💪|Curl de bíceps|3|12|45|Codos pegados al cuerpo y movimiento lento.
 gen|gym|🏃|Caminadora por intervalos|5|1|60|Un minuto rápido y uno suave en cada serie.`.split("\n").map(l=>{const a=l.split("|");return{sp:a[0],pl:a[1],ic:a[2],n:a[3],s:+a[4],r:+a[5],d:+a[6],t:a[7]}});
 const RK=[["Bronce",0,"#cd7f32"],["Plata",300,"#c0c8d8"],["Oro",800,"#f5a524"],["Platino",1600,"#2dd4bf"],["Diamante",3000,"#60a5fa"],["Élite",5000,"#c084fc"]];
-const DEMO=[["Valeria M.",4120],["Diego R.",3380],["Camila T.",2650],["Andrés L.",1900],["Sofía P.",1240],["Mateo G.",720],["Lucía H.",410]];
+const EM={"auth/invalid-email":"El correo no es válido","auth/missing-password":"Escribe tu contraseña","auth/invalid-credential":"Correo o contraseña incorrectos","auth/wrong-password":"Correo o contraseña incorrectos","auth/user-not-found":"Correo o contraseña incorrectos","auth/email-already-in-use":"Ese correo ya tiene cuenta","auth/weak-password":"La contraseña necesita al menos 6 caracteres","auth/popup-closed-by-user":"","auth/cancelled-popup-request":"","auth/network-request-failed":"Sin conexión a internet"};
+const msg=e=>e.code in EM?EM[e.code]:"Error: "+(e.code||e.message);
 const fresh=()=>({r:[],xp:{fut:0,vol:0,bas:0,gen:0},name:"Atleta"});
 let S=JSON.parse(localStorage.getItem("sportx2")||"null")||fresh(),tab="home",fs="all",fp="all",q=null,tm=null,dp=null;
+let C=null,U=null,P=null,H=[],am="in",pn="",rt="w",rs="global";
 const $=id=>document.getElementById(id),save=()=>localStorage.setItem("sportx2",JSON.stringify(S));
 const esc=s=>String(s).replace(/[<>&"']/g,c=>"&#"+c.charCodeAt(0)+";");
-const tot=()=>Object.values(S.xp).reduce((a,b)=>a+b,0),lv=x=>Math.floor(x/200)+1;
-const rk=x=>{let i=0;RK.forEach((r,j)=>{if(x>=r[1])i=j});return i};
+const hoy=()=>new Date().toLocaleDateString("sv-SE"),ayer=()=>new Date(Date.now()-864e5).toLocaleDateString("sv-SE");
+const lv=x=>Math.floor(x/200)+1,rk=x=>{let i=0;RK.forEach((r,j)=>{if(x>=r[1])i=j});return i};
 const mm=s=>String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
-const hoy=()=>new Date().toLocaleDateString("sv-SE");
+function toast(m){const t=$("tt");t.textContent=m;t.style.display="block";setTimeout(()=>t.style.display="none",3000)}
 function streak(){const ds=new Set(S.r.map(r=>r.d));let c=0,d=new Date();if(!ds.has(hoy()))d.setDate(d.getDate()-1);
 while(ds.has(d.toLocaleDateString("sv-SE"))){c++;d.setDate(d.getDate()-1)}return c}
+function V(){if(U&&P){const s=P.sportXp||{};return{name:P.displayName||"Atleta",user:P.username,photo:P.photo,xp:{fut:s.futbol||0,vol:s.voleibol||0,bas:s.basquetbol||0,gen:s.general||0},n:P.workouts||0,st:(P.lastDay==hoy()||P.lastDay==ayer())?P.streak||0:0,h:H}}
+return{name:S.name,xp:S.xp,n:S.r.length,st:streak(),h:S.r}}
+const tot=()=>Object.values(V().xp).reduce((a,b)=>a+b,0);
+const av=p=>p.photo?`<img src="${esc(p.photo)}" alt="">`:esc(((p.name||"?")[0]||"?").toUpperCase());
 const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone;
 function instBlock(){if(standalone)return"";if(dp)return'<button class="btn g" onclick="inst()">📲 Instalar la app</button>';
 if(/iphone|ipad/i.test(navigator.userAgent))return'<div class="card m" style="margin-top:12px">Para instalarla en iPhone o iPad: toca Compartir y elige “Agregar a pantalla de inicio”.</div>';return""}
-addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;go(tab)});
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;if($("auth").style.display=="none")go(tab)});
 const inst=()=>{dp.prompt();dp=null;go(tab)};
 function go(t){tab=t;document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));({home,train,rank,perfil})[t]();scrollTo(0,0)}
-function home(){const x=tot(),i=rk(x),p=(x%200)/200;
-$("main").innerHTML=`<h1>Hola, ${esc(S.name)}</h1><p class="m" style="margin-top:6px">${navigator.onLine?"Con conexión":"Sin conexión: todo sigue funcionando"}</p>
+
+/* ---------- Sesión ---------- */
+function authUI(){$("auth").style.display="block";const r=am=="up";
+$("auth").innerHTML=`<div class="app center"><div class="bigic">🏆</div><h1>SPORTX</h1><p class="m" style="margin:8px 0 22px">Entrena, sube de nivel y compite con tus amigos.</p>
+<button class="btn g" onclick="gLogin()" style="margin-top:0">Continuar con Google</button><p class="m" style="margin:16px 0 4px">o con tu correo</p>
+${r?'<input id="nm" placeholder="Tu nombre" maxlength="30" autocomplete="name">':""}
+<input id="em" type="email" placeholder="Correo" autocomplete="email"><input id="pw" type="password" placeholder="Contraseña (mínimo 6)" autocomplete="${r?"new":"current"}-password">
+<div class="err" id="er"></div><button class="btn" id="go" onclick="doAuth()" style="margin-top:4px">${r?"Crear cuenta":"Entrar"}</button>
+<button class="lnk" onclick="am='${r?"in":"up"}';authUI()">${r?"Ya tengo cuenta":"Crear una cuenta nueva"}</button>${r?"":'<button class="lnk" onclick="forgot()">Olvidé mi contraseña</button>'}
+<br><button class="lnk" style="color:var(--m)" onclick="guest()">Continuar sin cuenta</button></div>`}
+const er=t=>{const e=$("er");if(e)e.textContent=t};
+async function doAuth(){const em=$("em").value.trim(),pw=$("pw").value;er("");$("go").disabled=true;
+try{if(am=="up"){pn=$("nm").value.trim();await C.emailSignUp(em,pw,pn)}else await C.emailSignIn(em,pw)}catch(e){er(msg(e))}$("go").disabled=false}
+async function gLogin(){er("");try{await C.google()}catch(e){er(msg(e))}}
+async function forgot(){const em=$("em").value.trim();if(!em)return er("Escribe tu correo y vuelve a presionar");try{await C.resetPassword(em);er("");toast("Te enviamos un correo para cambiar la contraseña")}catch(e){er(msg(e))}}
+function guest(){localStorage.setItem("sportx_guest","1");enter()}
+function enter(){$("auth").style.display="none";go(tab)}
+async function refresh(){P=await C.getProfile();H=(await C.history(30)).map(x=>({n:x.exercise,ic:(E.find(e=>e.n==x.exercise)||{}).ic||"💪",sp:x.sport,t:x.durationSec||0,d:x.createdAt&&x.createdAt.toDate?x.createdAt.toDate().toLocaleDateString("sv-SE"):hoy(),xp:x.xp}))}
+function boot(){C=window.SportXCloud;if(!C){toast("No se pudo cargar firebase.js");return enter()}
+C.onAuth(async(u,err)=>{if(err){toast("Sin conexión: modo local");return enter()}
+if(u){U=u;try{if(pn){await C.saveProfile({displayName:pn});pn=""}await refresh()}catch(e){toast("No se pudo cargar tu perfil: "+(e.code||e.message))}localStorage.removeItem("sportx_guest");enter()}
+else{U=null;P=null;H=[];localStorage.getItem("sportx_guest")?enter():authUI()}})}
+addEventListener("DOMContentLoaded",boot);
+
+/* ---------- Pantallas ---------- */
+function home(){const v=V(),x=tot(),i=rk(x),p=(x%200)/200;
+$("main").innerHTML=`<h1>Hola, ${esc(v.name)}</h1><p class="m" style="margin-top:6px">${navigator.onLine?(U?"Cuenta en línea":"Modo local"):"Sin conexión"}</p>
 <div class="card hero"><svg width="112" height="112" viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="#ffffff14" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="#f5a524" stroke-width="10" stroke-linecap="round" stroke-dasharray="${p*326.7} 326.7" transform="rotate(-90 60 60)"/><text x="60" y="68" text-anchor="middle" fill="#fff" font-size="28" font-weight="800">${lv(x)}</text></svg>
 <div><div class="m">Nivel ${lv(x)}</div><div class="big">${x} XP</div><span class="badge" style="background:${RK[i][2]}">${RK[i][0]}</span></div></div>
-<div class="row"><div class="card stat"><b>${streak()}</b><span>Días de racha</span></div><div class="card stat"><b>${S.r.length}</b><span>Sesiones</span></div><div class="card stat"><b>${Math.round(S.r.reduce((a,r)=>a+r.t,0)/60)}</b><span>Minutos</span></div></div>
-<button class="btn" onclick="go('train')">Entrenar ahora</button>${instBlock()}`}
+<div class="row"><div class="card stat"><b>${v.st}</b><span>Días de racha</span></div><div class="card stat"><b>${v.n}</b><span>Sesiones</span></div><div class="card stat"><b>${Math.round(v.h.reduce((a,r)=>a+r.t,0)/60)}</b><span>Minutos</span></div></div>
+<button class="btn" onclick="go('train')">Entrenar ahora</button>${U?"":'<button class="btn g" onclick="authUI()">Crear cuenta o iniciar sesión</button>'}${instBlock()}`}
 function train(){const L=E.map((e,i)=>[e,i]).filter(([e])=>(fs=="all"||e.sp==fs)&&(fp=="all"||e.pl==fp));
 const ch=(a,c,f)=>a.map(([k,l])=>`<button class="chip ${c==k?"on":""}" onclick="${f}('${k}')">${l}</button>`).join("");
 $("main").innerHTML=`<h1>Entrenar</h1><h2>Deporte</h2><div class="chips">${ch([["all","Todos"],...Object.entries(SP).map(([k,v])=>[k,v[0]+" "+v[1]])],fs,"sf")}</div>
@@ -121,24 +163,44 @@ function draw(){const{e,s,r,t,rest}=q;$("ses").innerHTML=`<div class="app"><butt
 <div class="timer">${mm(rest>0?rest:t)}</div><p class="st">${rest>0?"Descansa, la siguiente serie ya viene":q.run?"En marcha":"En pausa"}</p>
 <div class="row"><div class="card stat"><b>${s}/${e.s}</b><span>Serie</span></div><div class="card stat"><b>${r}/${e.r}</b><span>Repetición</span></div></div>
 <button class="btn" onclick="rep()">Repetición hecha</button><button class="btn g" onclick="q.run=!q.run;draw()">${q.run?"Pausar":"Seguir"}</button></div></div>`}
-function fin(){clearInterval(tm);const e=q.e,xp=30+e.s*10,b=tot(),bi=rk(b),bl=lv(b);S.xp[e.sp]+=xp;
-S.r.unshift({n:e.n,ic:e.ic,sp:e.sp,t:q.t,d:hoy(),xp});save();enviarRegistro({jugador:S.name,deporte:SP[e.sp][1],ejercicio:e.n,lugar:e.pl=="casa"?"casa":"gimnasio",xp});const a=tot();q=null;
-$("ses").innerHTML=`<div class="app"><div class="center"><div class="bigic pop">🏆</div><h1>¡Entrenamiento completado!</h1><div class="timer">+${xp} XP</div>
+async function fin(){clearInterval(tm);const e=q.e,t=q.t,xp=30+e.s*10,b=tot(),bi=rk(b),bl=lv(b);q=null;let fail="";
+$("ses").innerHTML='<div class="app center"><p class="m">Guardando…</p></div>';
+try{if(U){await C.saveWorkout({exercise:e.n,sport:SP[e.sp][1],place:e.pl,series:e.s,reps:e.r,durationSec:t});await refresh()}
+else{S.xp[e.sp]+=xp;S.r.unshift({n:e.n,ic:e.ic,sp:e.sp,t,d:hoy(),xp});save()}
+enviarRegistro({jugador:V().name,deporte:SP[e.sp][1],ejercicio:e.n,lugar:e.pl=="casa"?"casa":"gimnasio",xp})}
+catch(err){fail=msg(err)||String(err.code||err.message)}
+const a=tot();
+$("ses").innerHTML=fail?`<div class="app"><div class="center"><div class="bigic">⚠️</div><h1>No se guardó</h1><p class="m" style="margin-top:10px">${esc(fail)}</p><button class="btn" onclick="closeS()">Volver</button></div></div>`:
+`<div class="app"><div class="center"><div class="bigic pop">🏆</div><h1>¡Entrenamiento completado!</h1><div class="timer">+${xp} XP</div>
 ${lv(a)>bl?`<p class="st">¡Subiste al nivel ${lv(a)}!</p>`:""}${rk(a)>bi?`<p class="st">¡Nuevo rango: ${RK[rk(a)][0]}!</p>`:""}
 <button class="btn" onclick="closeS('rank')">Ver mi ranking</button><button class="btn g" onclick="closeS()">Seguir entrenando</button></div></div>`}
 const closeS=t=>{$("ses").style.display="none";go(t||"train")},quit=()=>{clearInterval(tm);q=null;closeS()};
-function rank(){const x=tot(),i=rk(x),n=RK[i+1];const L=[...DEMO.map(([a,b])=>({n:a,x:b})),{n:esc(S.name)+" (tú)",x,me:1}].sort((a,b)=>b.x-a.x);
-$("main").innerHTML=`<h1>Ranking</h1><div class="card" style="margin-top:18px"><span class="badge" style="background:${RK[i][2]}">${RK[i][0]}</span><div class="big">${x} XP</div>
-<div class="bar"><i style="width:${n?(x-RK[i][1])/(n[1]-RK[i][1])*100:100}%"></i></div><p class="m">${n?`Te faltan ${n[1]-x} XP para ${n[0]}`:"Llegaste al rango máximo"}</p></div>
-<h2>Tu rango en cada deporte</h2>${Object.entries(SP).map(([k,v])=>{const y=S.xp[k],j=rk(y);return`<div class="card sp"><span class="ic">${v[0]}</span><div style="flex:1"><b>${v[1]}</b><div class="m">${y} XP</div></div><span class="badge" style="background:${RK[j][2]}">${RK[j][0]}</span></div>`}).join("")}
-<h2>Top de jugadores (datos de demostración)</h2><div class="card">${L.map((p,k)=>`<div class="lb ${p.me?"you":""}"><b>${["🥇","🥈","🥉"][k]||k+1}</b><span>${p.n}</span><em>${p.x} XP</em></div>`).join("")}</div>`}
-function perfil(){$("main").innerHTML=`<h1>Perfil</h1><div class="card" style="margin-top:18px"><b style="font-size:20px">${esc(S.name)}</b><p class="m" style="margin-top:4px">${S.r.length} entrenamientos, racha de ${streak()} días</p><button class="btn g" onclick="rn()">Cambiar nombre</button></div>${instBlock()}
-<div class="card m" style="margin-top:12px">El inicio de sesión con Google y el ranking en línea llegarán en la próxima versión.</div><h2>Historial</h2>
-${S.r.length?S.r.slice(0,30).map(r=>`<div class="card ex"><span class="ic">${r.ic}</span><div><b>${r.n}</b><div class="m">${r.d}, ${mm(r.t)}, +${r.xp} XP</div></div></div>`).join(""):'<div class="card m">Todavía no hay entrenamientos. Completa el primero para empezar tu historial.</div>'}
-${S.r.length?'<button class="btn g" onclick="del()">Borrar historial y puntos</button>':""}`}
-const rn=()=>{const n=prompt("¿Cómo te llamas?",S.name);if(n&&n.trim()){S.name=n.trim().slice(0,20);save();perfil()}};
-const del=()=>{if(confirm("¿Borrar todo tu historial y tus puntos?")){S=Object.assign(fresh(),{name:S.name});save();perfil()}};
+const rkCard=()=>{const x=tot(),i=rk(x),n=RK[i+1];return`<div class="card" style="margin-top:18px"><span class="badge" style="background:${RK[i][2]}">${RK[i][0]}</span><div class="big">${x} XP</div>
+<div class="bar"><i style="width:${n?(x-RK[i][1])/(n[1]-RK[i][1])*100:100}%"></i></div><p class="m">${n?`Te faltan ${n[1]-x} XP para ${n[0]}`:"Llegaste al rango máximo"}</p></div>`};
+async function rank(){const ch=(a,c,f)=>a.map(([k,l])=>`<button class="chip ${c==k?"on":""}" onclick="${f}('${k}')">${l}</button>`).join("");
+$("main").innerHTML=`<h1>Ranking</h1>${rkCard()}<h2>Tu rango en cada deporte</h2>${Object.entries(SP).map(([k,v])=>{const y=V().xp[k],j=rk(y);return`<div class="card sp"><span class="ic">${v[0]}</span><div style="flex:1"><b>${v[1]}</b><div class="m">${y} XP</div></div><span class="badge" style="background:${RK[j][2]}">${RK[j][0]}</span></div>`}).join("")}
+${U?`<h2>Ranking en línea</h2><div class="chips">${ch([["w","🌎 Mundial"],["f","👥 Amigos"]],rt,"stt")}</div>${rt=="w"?`<div class="chips" style="margin-top:8px">${ch([["global","Todos"],...Object.entries(SP).map(([k,v])=>[GK[k],v[0]+" "+v[1]])],rs,"ssp")}</div>`:""}<div id="rl" style="margin-top:12px"><div class="card m">Cargando…</div></div>`
+:'<div class="card m" style="margin-top:12px">Inicia sesión para ver el ranking en línea y competir con tus amigos.</div><button class="btn" onclick="authUI()">Iniciar sesión</button>'}`;
+if(!U)return;const t0=tab;
+try{const L=rt=="w"?(await C.ranking(rs,20)).map(p=>({uid:p.uid,name:p.displayName||p.username,x:p.score,photo:p.photo})):(await C.friendsRanking()).map(p=>({uid:p.uid,name:p.displayName||p.username,x:p.xp,photo:p.photo}));
+if(tab!=t0||!$("rl"))return;$("rl").innerHTML=(L.length?`<div class="card">${L.map((p,k)=>`<div class="lb ${p.uid==U.uid?"you":""}"><b>${["🥇","🥈","🥉"][k]||k+1}</b><span class="av">${av(p)}</span><span>${esc(p.name)}</span><em>${p.x} XP</em></div>`).join("")}</div>`:'<div class="card m">Todavía nadie tiene XP aquí. ¡Sé el primero!</div>')+(rt=="f"?await friendsUI():"")}
+catch(e){if($("rl"))$("rl").innerHTML=`<div class="card m">No se pudo cargar: ${esc(e.code||e.message)}</div>`}}
+const stt=k=>{rt=k;rank()},ssp=k=>{rs=k;rank()};
+async function friendsUI(){const f=await C.friendships(),inc=f.filter(x=>x.incoming&&x.other);
+return`<h2>Agregar amigo</h2><div class="card"><div class="fr"><input id="fu" placeholder="nombre de usuario" autocapitalize="none"><button class="btn sm" onclick="addF()">Agregar</button></div><p class="m" style="margin-top:8px">Tu usuario: @${esc(P.username)}</p></div>
+${inc.length?"<h2>Solicitudes</h2>"+inc.map(x=>`<div class="card sp"><span class="av">${av({name:x.other.displayName,photo:x.other.photo})}</span><b style="flex:1">${esc(x.other.displayName)}</b><button class="btn sm" onclick="acc('${x.id}')">Aceptar</button></div>`).join(""):""}`}
+async function addF(){const u=$("fu").value.trim();if(!u)return;try{await C.sendFriendRequest(u);toast("Solicitud enviada a @"+u.toLowerCase())}catch(e){toast(e.message||msg(e))}}
+async function acc(id){try{await C.acceptFriend(id);rank()}catch(e){toast(msg(e))}}
+function perfil(){const v=V(),h=v.h;$("main").innerHTML=`<h1>Perfil</h1><div class="card sp" style="margin-top:18px"><span class="av" style="width:56px;height:56px;font-size:22px">${av(v)}</span><div><b style="font-size:20px">${esc(v.name)}</b><p class="m" style="margin-top:2px">${v.user?"@"+esc(v.user)+", ":""}${v.n} entrenamientos, racha de ${v.st} días</p></div></div>
+<button class="btn g" onclick="rn()">Cambiar nombre</button>${instBlock()}
+${U?`<button class="btn g" onclick="out()">Cerrar sesión</button>`:'<div class="card m" style="margin-top:12px">Estás en modo local. Crea una cuenta para guardar tu XP en la nube y entrar al ranking.</div><button class="btn" onclick="authUI()">Crear cuenta o iniciar sesión</button>'}
+<h2>Historial</h2>${h.length?h.slice(0,30).map(r=>`<div class="card ex"><span class="ic">${r.ic}</span><div><b>${esc(r.n)}</b><div class="m">${r.d}, ${mm(r.t)}, +${r.xp} XP</div></div></div>`).join(""):'<div class="card m">Todavía no hay entrenamientos. Completa el primero para empezar tu historial.</div>'}
+${v.n?'<button class="btn g" onclick="del()">Borrar historial y puntos</button>':""}`}
+async function rn(){const n=prompt("¿Cómo te llamas?",V().name);if(!n||!n.trim())return;
+try{if(U){await C.saveProfile({displayName:n.trim().slice(0,20)});await refresh()}else{S.name=n.trim().slice(0,20);save()}perfil()}catch(e){toast(msg(e))}}
+async function del(){if(!confirm("¿Borrar todo tu historial y tus puntos?"))return;
+try{if(U){await C.resetAll();await refresh()}else{S=Object.assign(fresh(),{name:S.name});save()}perfil()}catch(e){toast(msg(e))}}
+async function out(){if(!confirm("¿Cerrar sesión?"))return;localStorage.removeItem("sportx_guest");try{await C.logout()}catch(e){toast(msg(e))}}
 addEventListener("online",()=>tab=="home"&&home());addEventListener("offline",()=>tab=="home"&&home());
 if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));
-go("home");
 </script></body></html>
