@@ -72,6 +72,14 @@ input:focus{outline:2px solid var(--a)}
 .sep::before,.sep::after{content:"";flex:1;height:1px;background:#ffffff14}
 .lg-links{display:flex;justify-content:center;flex-wrap:wrap;margin-top:4px}
 .lg-guest{color:var(--m);margin-top:12px}
+.hd{display:flex;align-items:center;gap:14px}.hd h1{font-size:24px}.hd-av{width:54px;height:54px;font-size:24px;cursor:pointer}
+.card.lvl{background:linear-gradient(135deg,#1f2a47,#141b2e);border:1px solid #ffffff12;border-radius:24px;margin-top:20px;padding:18px}
+.lvl-r{display:flex;align-items:center;gap:18px;margin-bottom:10px}
+.stk{display:flex;align-items:center;gap:12px}.stk b{font-size:28px;line-height:1}.stk-i{width:42px;height:42px;border-radius:14px;background:#f5a5242b;color:var(--a);display:flex;align-items:center;justify-content:center}
+.dots{display:flex;justify-content:space-between;margin-top:14px}.dot{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--m)}.dot i{width:26px;height:26px;border-radius:50%;background:#ffffff0f}.dot.on i{background:var(--a);box-shadow:0 0 12px #f5a52466}
+.ct{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.wk{display:flex;gap:8px;height:110px}.wc{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--m)}.wb{flex:1;width:100%;background:#ffffff0a;border-radius:10px;display:flex;align-items:flex-end;overflow:hidden}.wb i{display:block;width:100%;background:linear-gradient(180deg,var(--b),#0f766e);border-radius:10px}.wb i.td{background:linear-gradient(180deg,#ffc14d,var(--a))}
+.qa{display:flex;gap:10px;margin-top:12px}.qa button{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:16px;padding:16px;font-size:16px;font-weight:700}.qa-p{background:var(--a);color:#1a1200}.qa-s{background:var(--s2);color:var(--t)}.qa button:active{transform:scale(.97)}
 </style></head><body>
 <main id="main" class="app"></main><div id="ses"></div>
 <div id="auth"><div class="lg"><div class="lg-in"><div class="lg-logo"><svg width="44" height="44" viewBox="0 0 24 24" fill="#1a1200"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></div><h1 class="lg-h">SPORT<span>X</span></h1><p class="lg-tag">Cargando…</p></div></div></div>
@@ -170,12 +178,20 @@ else{U=null;P=null;H=[];localStorage.getItem("sportx_guest")?enter():authUI()}})
 addEventListener("DOMContentLoaded",boot);
 
 /* ---------- Pantallas ---------- */
-function home(){const v=V(),x=tot(),i=rk(x),p=(x%200)/200;
-$("main").innerHTML=`<h1>Hola, ${esc(v.name)}</h1><p class="m" style="margin-top:6px">${navigator.onLine?(U?"Cuenta en línea":"Modo local"):"Sin conexión"}</p>
-<div class="card hero"><svg width="112" height="112" viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="#ffffff14" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="#f5a524" stroke-width="10" stroke-linecap="round" stroke-dasharray="${p*326.7} 326.7" transform="rotate(-90 60 60)"/><text x="60" y="68" text-anchor="middle" fill="#fff" font-size="28" font-weight="800">${lv(x)}</text></svg>
-<div><div class="m">Nivel ${lv(x)}</div><div class="big">${x} XP</div><span class="badge" style="background:${RK[i][2]}">${RK[i][0]}</span></div></div>
-<div class="row"><div class="card stat"><b>${v.st}</b><span>Días de racha</span></div><div class="card stat"><b>${v.n}</b><span>Sesiones</span></div><div class="card stat"><b>${Math.round(v.h.reduce((a,r)=>a+r.t,0)/60)}</b><span>Minutos</span></div></div>
-<button class="btn" onclick="go('train')">Entrenar ahora</button>${U?"":'<button class="btn g" onclick="authUI()">Crear cuenta o iniciar sesión</button>'}${instBlock()}`}
+const SV='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
+const IC={fire:SV+'<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-5 1-9z"/></svg>',bolt:SV+'<path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>',cup:SV+'<path d="M7 4h10v5a5 5 0 0 1-10 0V4zM4 5h3v3a3 3 0 0 1-3-3zM20 5h-3v3a3 3 0 0 0 3-3zM12 14v4M8 20h8"/></svg>'};
+function home(){const v=V(),x=tot(),i=rk(x),n=RK[i+1],f=S.pf||{},g=f.goal||3,p=(x%200)/200;
+const ds=[...Array(7)].map((_,k)=>{const d=new Date(Date.now()-(6-k)*864e5),key=d.toLocaleDateString("sv-SE");return{l:"DLMMJVS"[d.getDay()],xp:v.h.filter(r=>r.d==key).reduce((a,r)=>a+r.xp,0)}});
+const mx=Math.max(...ds.map(d=>d.xp),1),wd=ds.filter(d=>d.xp>0).length,wx=ds.reduce((a,d)=>a+d.xp,0);
+$("main").innerHTML=`<div class="hd"><span class="av hd-av" style="box-shadow:0 0 0 3px ${f.ring||"#f5a524"}" onclick="go('perfil')">${av(v)}</span><div><h1>Hola, ${esc(v.name)}</h1><p class="m" style="margin-top:4px">${navigator.onLine?(U?"Cuenta en línea":"Modo local"):"Sin conexión"}</p></div></div>
+<div class="card lvl"><div class="lvl-r"><svg width="112" height="112" viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="#ffffff14" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="#2dd4bf" stroke-width="10" stroke-linecap="round" stroke-dasharray="${p*326.7} 326.7" transform="rotate(-90 60 60)"/><text x="60" y="70" text-anchor="middle" fill="#fff" font-size="30" font-weight="800">${lv(x)}</text></svg>
+<div><div class="m">Nivel ${lv(x)}, faltan ${200-x%200} XP para el siguiente</div><div class="big">${x} XP</div><span class="badge" style="background:${RK[i][2]}">${RK[i][0]}</span></div></div>
+<div class="bar"><i style="width:${n?(x-RK[i][1])/(n[1]-RK[i][1])*100:100}%"></i></div><p class="m">${n?`${n[1]-x} XP para el rango ${n[0]}`:"Llegaste al rango máximo"}</p></div>
+<div class="card"><div class="stk"><span class="stk-i">${IC.fire}</span><div><b>${v.st}</b> <span class="m">días de racha</span></div></div><div class="dots">${ds.map(d=>`<div class="dot ${d.xp?"on":""}"><i></i>${d.l}</div>`).join("")}</div></div>
+<div class="card"><div class="ct"><b>Esta semana</b><span class="m">${wx} XP</span></div><div class="wk">${ds.map((d,k)=>`<div class="wc"><div class="wb"><i class="${k==6?"td":""}" style="height:${d.xp?Math.max(d.xp/mx*100,10):0}%"></i></div><span>${d.l}</span></div>`).join("")}</div></div>
+<div class="card"><div class="ct" style="margin-bottom:0"><b>Meta semanal</b><span class="m">${wd} de ${g} días</span></div><div class="bar"><i style="width:${Math.min(100,wd/g*100)}%"></i></div><p class="m">${wd>=g?"¡Meta cumplida!":`Te faltan ${g-wd} ${g-wd==1?"día":"días"} esta semana`}</p></div>
+<div class="row"><div class="card stat"><b>${v.n}</b><span>Sesiones</span></div><div class="card stat"><b>${Math.round(v.h.reduce((a,r)=>a+r.t,0)/60)}</b><span>Minutos</span></div></div>
+<div class="qa"><button class="qa-p" onclick="go('train')">${IC.bolt}Entrenar ahora</button><button class="qa-s" onclick="go('rank')">${IC.cup}Ranking</button></div>${U?"":'<button class="btn g" onclick="authUI()">Crear cuenta o iniciar sesión</button>'}${instBlock()}`}
 function train(){const L=E.map((e,i)=>[e,i]).filter(([e])=>(fs=="all"||e.sp==fs)&&(fp=="all"||e.pl==fp));
 const ch=(a,c,f)=>a.map(([k,l])=>`<button class="chip ${c==k?"on":""}" onclick="${f}('${k}')">${l}</button>`).join("");
 $("main").innerHTML=`<h1>Entrenar</h1><h2>Deporte</h2><div class="chips">${ch([["all","Todos"],...Object.entries(SP).map(([k,v])=>[k,v[0]+" "+v[1]])],fs,"sf")}</div>
