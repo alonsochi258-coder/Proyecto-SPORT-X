@@ -31,6 +31,8 @@ export function nextStreak(lastDay, streak, today = new Date()) {
 }
 export const pairId = (a, b) => [a, b].sort().join('_');
 
+const withTimeout = (p, ms, msg = 'timeout') => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error(msg), { code: 'timeout' })), ms))]);
+
 /* ---------- Carga del SDK (si no hay internet, la app sigue funcionando local) ---------- */
 let A, F, auth, db, ready = null;
 function load() {
@@ -38,9 +40,9 @@ function load() {
   ready = (async () => {
     if (CONFIG.apiKey === 'PEGA_AQUI') throw new Error('Falta pegar el firebaseConfig en firebase.js');
     const base = `https://www.gstatic.com/firebasejs/${SDK}/`;
-    const [app, a, f] = await Promise.all([
+    const [app, a, f] = await withTimeout(Promise.all([
       import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-firestore.js')
-    ]);
+    ]), 12000, 'No se pudo cargar Firebase');
     const fb = app.initializeApp(CONFIG);
     A = a; F = f; auth = a.getAuth(fb); db = f.getFirestore(fb);
     auth.languageCode = 'es';
@@ -53,7 +55,7 @@ function load() {
 async function onAuth(cb) {
   try { await load(); } catch (e) { cb(null, e); return () => {}; }
   return A.onAuthStateChanged(auth, async (u) => {
-    if (u) { try { await ensureProfile(u); } catch (e) { console.warn('Perfil:', e); } }
+    if (u) { try { await withTimeout(ensureProfile(u), 8000); } catch (e) { console.warn('Perfil:', e); } }
     cb(u, null);
   });
 }
@@ -103,19 +105,22 @@ async function saveProfile({ displayName, photo }) {
 }
 
 /* ---------- Entrenamientos y XP ---------- */
-async function saveWorkout({ exercise, sport, place, series, reps, durationSec }) {
+async function saveWorkout({ id, at, exercise, sport, place, series, reps, durationSec }) {
   await load();
   const uid = me().uid, sp = normSport(sport), xp = calcXp(series);
   const pRef = F.doc(db, 'profiles', uid);
-  const wRef = F.doc(F.collection(db, 'workouts', uid, 'items'));
+  const wRef = id ? F.doc(db, 'workouts', uid, 'items', String(id)) : F.doc(F.collection(db, 'workouts', uid, 'items'));   // id fijo = no se duplica la XP
   await F.runTransaction(db, async (tx) => {
     const p = (await tx.get(pRef)).data();
+    if ((await tx.get(wRef)).exists()) return;          // ya estaba sincronizado: no sumar otra vez
     const total = p.xp + xp;
+    const when = at ? new Date(at) : new Date(), day = dayKey(when);
+    const keep = p.lastDay && day < p.lastDay;          // entreno viejo: no rompe la racha
     tx.set(wRef, { exercise, sport: sp, place: place || null, series, reps: reps || null, durationSec: durationSec || 0, xp, createdAt: F.serverTimestamp() });
     tx.update(pRef, {
       xp: total, level: calcLevel(total), workouts: p.workouts + 1,
       [`sportXp.${sp}`]: (p.sportXp[sp] || 0) + xp,
-      streak: nextStreak(p.lastDay, p.streak), lastDay: dayKey(), lastWorkoutId: wRef.id,
+      streak: keep ? p.streak : nextStreak(p.lastDay, p.streak, when), lastDay: keep ? p.lastDay : day, lastWorkoutId: wRef.id,
       updatedAt: F.serverTimestamp()
     });
   });
