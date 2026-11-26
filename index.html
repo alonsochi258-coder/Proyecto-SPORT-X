@@ -104,6 +104,10 @@ input:focus{outline:2px solid var(--a)}
 .rn{display:flex;align-items:center;gap:8px;font-weight:600}.rn span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .badge.sm{font-size:11px;padding:2px 8px}.bar.sm{height:6px;margin:6px 0 0}
 .rg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.rs{text-align:center;margin:0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.pcard{margin-top:18px;text-align:center;border-radius:26px;padding:22px 18px}
+.pa{width:100px;height:100px;font-size:46px;cursor:pointer}
+.bd.on{background:linear-gradient(160deg,#f5a52433,#141b2e);border:1px solid #f5a52466;color:var(--t)}
+.pgr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 </style></head><body>
 <main id="main" class="app"></main><div id="ses"></div>
 <div id="auth"><div class="lg"><div class="lg-in"><div class="lg-logo"><svg width="44" height="44" viewBox="0 0 24 24" fill="#1a1200"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></div><h1 class="lg-h">SPORT<span>X</span></h1><p class="lg-tag">Cargando…</p></div></div></div>
@@ -164,6 +168,8 @@ function streak(){const ds=new Set(S.r.map(r=>r.d));let c=0,d=new Date();if(!ds.
 while(ds.has(d.toLocaleDateString("sv-SE"))){c++;d.setDate(d.getDate()-1)}return c}
 function V(){if(U&&P){const s=P.sportXp||{};return{name:P.displayName||"Atleta",user:P.username,photo:P.photo,xp:{fut:s.futbol||0,vol:s.voleibol||0,bas:s.basquetbol||0,gen:s.general||0},n:P.workouts||0,st:(P.lastDay==hoy()||P.lastDay==ayer())?P.streak||0:0,h:H}}
 return{name:S.name,photo:S.photo,xp:S.xp,n:S.r.length,st:streak(),h:S.r}}
+function PF(){try{return U?JSON.parse(localStorage.getItem("sportx_pf_"+U.uid)||"{}"):(S.pf||{})}catch(e){return{}}}
+function setPF(o){if(U)localStorage.setItem("sportx_pf_"+U.uid,JSON.stringify(o));else{S.pf=o;save()}}
 const tot=()=>Object.values(V().xp).reduce((a,b)=>a+b,0);
 const av=p=>p.photo?(p.photo.startsWith("emoji:")?esc(p.photo.slice(6)):`<img src="${esc(p.photo)}" alt="">`):esc(((p.name||"?")[0]||"?").toUpperCase());
 const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone;
@@ -204,7 +210,7 @@ addEventListener("DOMContentLoaded",boot);
 /* ---------- Pantallas ---------- */
 const SV='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
 const IC={fire:SV+'<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-5 1-9z"/></svg>',bolt:SV+'<path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>',cup:SV+'<path d="M7 4h10v5a5 5 0 0 1-10 0V4zM4 5h3v3a3 3 0 0 1-3-3zM20 5h-3v3a3 3 0 0 0 3-3zM12 14v4M8 20h8"/></svg>'};
-function home(){const v=V(),x=tot(),i=rk(x),n=RK[i+1],f=S.pf||{},g=f.goal||3,p=(x%200)/200;
+function home(){const v=V(),x=tot(),i=rk(x),n=RK[i+1],f=PF(),g=f.goal||3,p=(x%200)/200;
 const ds=[...Array(7)].map((_,k)=>{const d=new Date(Date.now()-(6-k)*864e5),key=d.toLocaleDateString("sv-SE");return{l:"DLMMJVS"[d.getDay()],xp:v.h.filter(r=>r.d==key).reduce((a,r)=>a+r.xp,0)}});
 const mx=Math.max(...ds.map(d=>d.xp),1),wd=ds.filter(d=>d.xp>0).length,wx=ds.reduce((a,d)=>a+d.xp,0);
 $("main").innerHTML=`<div class="hd"><span class="av hd-av" style="box-shadow:0 0 0 3px ${f.ring||"#f5a524"}" onclick="go('perfil')">${av(v)}</span><div><h1>Hola, ${esc(v.name)}</h1><p class="m" style="margin-top:4px">${navigator.onLine?(U?"Cuenta en línea":"Modo local"):"Sin conexión"}</p></div></div>
@@ -269,23 +275,26 @@ return`<h2>Agregar amigo</h2><div class="card"><div class="fr"><input id="fu" pl
 ${inc.length?"<h2>Solicitudes</h2>"+inc.map(x=>`<div class="card sp"><span class="av">${av({name:x.other.displayName,photo:x.other.photo})}</span><b style="flex:1">${esc(x.other.displayName)}</b><button class="btn sm" onclick="acc('${x.id}')">Aceptar</button></div>`).join(""):""}`}
 async function addF(){const u=$("fu").value.trim();if(!u)return;try{await C.sendFriendRequest(u);toast("Solicitud enviada a @"+u.toLowerCase())}catch(e){toast(e.message||msg(e))}}
 async function acc(id){try{await C.acceptFriend(id);rank()}catch(e){toast(msg(e))}}
-function perfil(){const v=V(),h=v.h,x=tot(),r=RK[rk(x)],f=S.pf||{},rc=f.ring||"#f5a524",g=f.goal||3;
+function perfil(){const v=V(),h=v.h,x=tot(),r=RK[rk(x)],f=PF(),rc=f.ring||"#f5a524",g=f.goal||3,p=(x%200)/200;
 const ds=new Set(h.filter(a=>a.d>=new Date(Date.now()-6*864e5).toLocaleDateString("sv-SE")).map(a=>a.d)),wd=ds.size,nsp=Object.values(v.xp).filter(a=>a>0).length;
 const BG=[["🥇","Primer paso",v.n>=1],["🔥","Racha de 3",v.st>=3],["⚡","100 XP",x>=100],["💪","10 sesiones",v.n>=10],["🏅","Nivel 5",lv(x)>=5],["🌟","Rango Oro",rk(x)>=2],["🎯","Meta semanal",wd>=g],["🧩","Multideporte",nsp>=3]];
-$("main").innerHTML=`<h1>Perfil</h1><div class="card" style="margin-top:18px;text-align:center;background:linear-gradient(160deg,${rc}33,#141b2e 70%);border:1px solid ${rc}66">
-<span class="av" style="width:92px;height:92px;font-size:44px;cursor:pointer;box-shadow:0 0 0 4px ${rc}" onclick="pickAv()">${av(v)}</span>
-<div style="font-size:22px;font-weight:800;margin-top:12px">${esc(v.name)}</div><p class="m">${v.user?"@"+esc(v.user):"Modo local"}</p>
+const gk=sp=>GR[Object.keys(GK).find(k=>GK[k]==sp)||sp]||GR.gen;
+$("main").innerHTML=`<h1>Perfil</h1><div class="card pcard" style="background:linear-gradient(160deg,${rc}33,#141b2e 70%);border:1px solid ${rc}66">
+<span class="av pa" style="box-shadow:0 0 0 4px ${rc},0 0 30px ${rc}55" onclick="pickAv()">${av(v)}</span>
+<div style="font-size:22px;font-weight:800;margin-top:14px">${esc(v.name)}</div><p class="m">${v.user?"@"+esc(v.user):"Modo local"}</p>
 <div style="margin-top:8px"><span class="badge" style="background:${r[2]}">${r[0]}</span> <span class="badge" style="background:#ffffff1f;color:var(--t)">Nivel ${lv(x)}</span>${f.fav?` <span class="badge" style="background:#ffffff1f;color:var(--t)">${SP[f.fav][0]} ${SP[f.fav][1]}</span>`:""}</div>
-${f.motto?`<p style="margin-top:12px;font-style:italic">“${esc(f.motto)}”</p>`:""}${f.bio?`<p class="m" style="margin-top:8px;line-height:1.5">${esc(f.bio)}</p>`:'<p class="m" style="margin-top:12px">Cuéntale a los demás quién eres como deportista.</p>'}</div>
-<div class="row"><div class="card stat"><b>${v.n}</b><span>Entrenamientos</span></div><div class="card stat"><b>${v.st}</b><span>Racha</span></div><div class="card stat"><b>${x}</b><span>XP total</span></div></div>
-<div class="card"><b>Meta semanal</b><div class="bar"><i style="width:${Math.min(100,wd/g*100)}%"></i></div><p class="m">${wd} de ${g} días entrenados en los últimos 7 días${wd>=g?". ¡Meta cumplida!":""}</p></div>
-<h2>Insignias (${BG.filter(b=>b[2]).length} de ${BG.length})</h2><div class="bg">${BG.map(b=>`<div class="bd ${b[2]?"":"off"}"><i>${b[0]}</i>${b[1]}</div>`).join("")}</div>
-<button class="btn" onclick="editPf()">Editar mi perfil</button><button class="btn g" onclick="pickAv()">Cambiar foto</button><button class="btn g" onclick="rn()">Cambiar nombre</button>${instBlock()}
+${f.motto?`<p style="margin-top:12px;font-style:italic">“${esc(f.motto)}”</p>`:""}${f.bio?`<p class="m" style="margin-top:8px;line-height:1.5">${esc(f.bio)}</p>`:'<p class="m" style="margin-top:12px">Cuéntale a los demás quién eres como deportista.</p>'}
+<div class="bar" style="margin-top:16px"><i style="width:${p*100}%"></i></div><p class="m" style="font-size:12px">${x%200} de 200 XP para el nivel ${lv(x)+1}</p></div>
+<div class="row"><div class="card stat"><b style="color:var(--blue,#60a5fa)">${v.n}</b><span>Entrenamientos</span></div><div class="card stat"><b style="color:var(--a)">${v.st}</b><span>Racha</span></div><div class="card stat"><b style="color:var(--b)">${x}</b><span>XP total</span></div></div>
+<div class="card"><div class="ct" style="margin-bottom:0"><b>Meta semanal</b><span class="m">${wd} de ${g} días</span></div><div class="bar"><i style="width:${Math.min(100,wd/g*100)}%"></i></div><p class="m">${wd>=g?"¡Meta cumplida!":`Te faltan ${g-wd} ${g-wd==1?"día":"días"} en los últimos 7 días`}</p></div>
+<h2>Insignias (${BG.filter(b=>b[2]).length} de ${BG.length})</h2><div class="bg">${BG.map(b=>`<div class="bd ${b[2]?"on":"off"}"><i>${b[0]}</i>${b[1]}</div>`).join("")}</div>
+<button class="btn" onclick="editPf()">Editar mi perfil</button><p class="m" style="margin-top:8px;font-size:12px;text-align:center">Reseña, lema, meta y color se guardan en este dispositivo, separados por cuenta.</p>
+<div class="row"><button class="btn g" onclick="pickAv()">Cambiar foto</button><button class="btn g" onclick="rn()">Cambiar nombre</button></div>${instBlock()}
 ${U?`<button class="btn g" onclick="out()">Cerrar sesión</button>`:'<div class="card m" style="margin-top:12px">Estás en modo local. Crea una cuenta para guardar tu XP en la nube y entrar al ranking.</div><button class="btn" onclick="authUI()">Crear cuenta o iniciar sesión</button>'}
-<h2>Historial</h2>${h.length?h.slice(0,30).map(r=>`<div class="card ex"><span class="ic">${r.ic}</span><div><b>${esc(r.n)}</b><div class="m">${r.d}, ${mm(r.t)}, +${r.xp} XP</div></div></div>`).join(""):'<div class="card m">Todavía no hay entrenamientos. Completa el primero para empezar tu historial.</div>'}
+<h2>Historial</h2>${h.length?h.slice(0,30).map(r=>{const g2=gk(r.sp);return`<div class="card ex"><span class="ex-i" style="background:linear-gradient(135deg,${g2[0]},${g2[1]})">${r.ic}</span><div><b>${esc(r.n)}</b><div class="m">${r.d}, ${mm(r.t)}, +${r.xp} XP</div></div></div>`}).join(""):'<div class="card m">Todavía no hay entrenamientos. Completa el primero para empezar tu historial.</div>'}
 ${v.n?'<button class="btn g" onclick="del()">Borrar historial y puntos</button>':""}`}
 const RC=["#f5a524","#2dd4bf","#60a5fa","#c084fc","#fb7185","#4ade80"];let ed=null;
-function editPf(){ed=Object.assign({bio:"",motto:"",fav:"",goal:3,ring:RC[0]},S.pf||{});edDraw()}
+function editPf(){ed=Object.assign({bio:"",motto:"",fav:"",goal:3,ring:RC[0]},PF());edDraw()}
 function edSet(k,v){ed.bio=$("eb").value;ed.motto=$("em2").value;ed[k]=v;edDraw()}
 function edDraw(){$("pk").style.display="flex";$("pk").innerHTML=`<div class="sh" style="max-height:92vh;overflow:auto"><b style="font-size:18px">Editar mi perfil</b>
 <textarea id="eb" maxlength="140" rows="3" placeholder="Sobre mí: cuenta quién eres como deportista">${esc(ed.bio)}</textarea><input id="em2" maxlength="40" placeholder="Tu lema" value="${esc(ed.motto)}">
@@ -293,7 +302,7 @@ function edDraw(){$("pk").style.display="flex";$("pk").innerHTML=`<div class="sh
 <h2>Meta semanal (días)</h2><div class="chips">${[1,2,3,4,5,6,7].map(d=>`<button class="chip ${ed.goal==d?"on":""}" onclick="edSet('goal',${d})">${d}</button>`).join("")}</div>
 <h2>Color de tu marco</h2><div class="ag">${RC.map(c=>`<button class="av" style="background:${c};border:0;width:40px;height:40px;${ed.ring==c?"outline:3px solid #fff":""}" onclick="edSet('ring','${c}')"></button>`).join("")}</div>
 <button class="btn" onclick="edSave()">Guardar</button><button class="lnk" style="width:100%" onclick="$('pk').style.display='none'">Cancelar</button></div>`}
-function edSave(){ed.bio=$("eb").value.trim();ed.motto=$("em2").value.trim();S.pf=ed;save();$("pk").style.display="none";perfil()}
+function edSave(){ed.bio=$("eb").value.trim();ed.motto=$("em2").value.trim();setPF(ed);$("pk").style.display="none";perfil()}
 const AVS=["😎","🦁","🐯","🦅","🐺","🦈","⚽","🏀","🏐","💪","🔥","🏆"];
 function pickAv(){const p=$("pk");p.style.display="flex";
 p.innerHTML=`<div class="sh"><b style="font-size:18px">Foto de perfil</b><div class="ag">${AVS.map(a=>`<button class="av" style="width:56px;height:56px;font-size:28px;border:0;color:inherit" onclick="setAv('emoji:${a}')">${a}</button>`).join("")}</div>
