@@ -54,9 +54,27 @@ input:focus{outline:2px solid var(--a)}
 .pop{animation:pop .6s cubic-bezier(.2,1.6,.4,1)}@keyframes pop{from{transform:scale(.3);opacity:0}}
 #tt{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--s2);padding:12px 18px;border-radius:14px;z-index:30;display:none;max-width:90%;font-size:14px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+.lg{min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:calc(28px + env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom));position:relative;overflow:hidden}
+.lg::before{content:"";position:absolute;top:-150px;left:50%;width:460px;height:460px;transform:translateX(-50%);background:radial-gradient(circle,#f5a52438,transparent 65%);pointer-events:none}
+.lg::after{content:"";position:absolute;bottom:-180px;right:-140px;width:380px;height:380px;background:radial-gradient(circle,#2dd4bf22,transparent 65%);pointer-events:none}
+.lg-in{position:relative;z-index:1;width:100%;max-width:420px;margin:0 auto;text-align:center;animation:lgup .5s ease both}
+@keyframes lgup{from{opacity:0;transform:translateY(14px)}}
+.lg-logo{width:84px;height:84px;margin:0 auto 18px;border-radius:26px;background:linear-gradient(145deg,#ffc14d,#f5a524 55%,#c27a00);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 40px #f5a52459,inset 0 1px 0 #ffffff66}
+.lg-h{font-size:38px;font-weight:800;letter-spacing:4px}.lg-h span{color:var(--a)}
+.lg-tag{color:var(--m);margin:10px auto 16px;max-width:300px;line-height:1.45}
+.lg-pills{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.lg-pills span{background:#ffffff0d;border:1px solid #ffffff12;color:var(--t);font-size:12px;font-weight:600;padding:6px 12px;border-radius:99px}
+.lg-card{background:linear-gradient(160deg,#1f2a47aa,#141b2e);border:1px solid #ffffff12;border-radius:24px;padding:18px;text-align:left}
+.lg-card input{background:#0b1020aa}
+.gbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:14px;padding:15px;background:#fff;color:#1f1f1f;font-size:16px;font-weight:700}
+.gbtn:active{transform:scale(.97)}.gbtn svg{width:20px;height:20px}
+.sep{display:flex;align-items:center;gap:12px;margin:18px 0 4px;color:var(--m);font-size:13px}
+.sep::before,.sep::after{content:"";flex:1;height:1px;background:#ffffff14}
+.lg-links{display:flex;justify-content:center;flex-wrap:wrap;margin-top:4px}
+.lg-guest{color:var(--m);margin-top:12px}
 </style></head><body>
 <main id="main" class="app"></main><div id="ses"></div>
-<div id="auth"><div class="app center"><div class="bigic">🏆</div><h1>SPORTX</h1><p class="m" style="margin-top:10px">Cargando…</p></div></div>
+<div id="auth"><div class="lg"><div class="lg-in"><div class="lg-logo"><svg width="44" height="44" viewBox="0 0 24 24" fill="#1a1200"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></div><h1 class="lg-h">SPORT<span>X</span></h1><p class="lg-tag">Cargando…</p></div></div></div>
 <div id="tt"></div><div id="pk"></div>
 <nav><div>
 <button data-t="home" onclick="go('home')"><i>🏠</i>Inicio</button>
@@ -124,14 +142,19 @@ const inst=()=>{dp.prompt();dp=null;go(tab)};
 function go(t){tab=t;document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));({home,train,rank,perfil})[t]();scrollTo(0,0)}
 
 /* ---------- Sesión ---------- */
+const BOLT='<svg width="44" height="44" viewBox="0 0 24 24" fill="#1a1200"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>';
+const GSVG='<svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 function authUI(){$("auth").style.display="block";const r=am=="up";
-$("auth").innerHTML=`<div class="app center"><div class="bigic">🏆</div><h1>SPORTX</h1><p class="m" style="margin:8px 0 22px">Entrena, sube de nivel y compite con tus amigos.</p>
-<button class="btn g" onclick="gLogin()" style="margin-top:0">Continuar con Google</button><p class="m" style="margin:16px 0 4px">o con tu correo</p>
+$("auth").innerHTML=`<div class="lg"><div class="lg-in"><div class="lg-logo">${BOLT}</div><h1 class="lg-h">SPORT<span>X</span></h1>
+<p class="lg-tag">Entrena, sube de nivel y compite con tus amigos.</p>
+<div class="lg-pills"><span>⚡ XP</span><span>🏅 Rangos</span><span>👥 Amigos</span></div>
+<div class="lg-card"><button class="gbtn" onclick="gLogin()">${GSVG}Continuar con Google</button>
+<div class="sep"><span>o con tu correo</span></div>
 ${r?'<input id="nm" placeholder="Tu nombre" maxlength="30" autocomplete="name">':""}
 <input id="em" type="email" placeholder="Correo" autocomplete="email"><input id="pw" type="password" placeholder="Contraseña (mínimo 6)" autocomplete="${r?"new":"current"}-password">
-<div class="err" id="er"></div><button class="btn" id="go" onclick="doAuth()" style="margin-top:4px">${r?"Crear cuenta":"Entrar"}</button>
-<button class="lnk" onclick="am='${r?"in":"up"}';authUI()">${r?"Ya tengo cuenta":"Crear una cuenta nueva"}</button>${r?"":'<button class="lnk" onclick="forgot()">Olvidé mi contraseña</button>'}
-<br><button class="lnk" style="color:var(--m)" onclick="guest()">Continuar sin cuenta</button></div>`}
+<div class="err" id="er"></div><button class="btn" id="go" onclick="doAuth()" style="margin-top:4px">${r?"Crear cuenta":"Entrar con correo"}</button>
+<div class="lg-links"><button class="lnk" onclick="am='${r?"in":"up"}';authUI()">${r?"Ya tengo cuenta":"Crear una cuenta nueva"}</button>${r?"":'<button class="lnk" onclick="forgot()">Olvidé mi contraseña</button>'}</div></div>
+<button class="lnk lg-guest" onclick="guest()">Continuar sin cuenta</button></div></div>`}
 const er=t=>{const e=$("er");if(e)e.textContent=t};
 async function doAuth(){const em=$("em").value.trim(),pw=$("pw").value;er("");$("go").disabled=true;
 try{if(am=="up"){pn=$("nm").value.trim();await C.emailSignUp(em,pw,pn)}else await C.emailSignIn(em,pw)}catch(e){er(msg(e))}$("go").disabled=false}
