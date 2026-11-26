@@ -86,6 +86,9 @@ input:focus{outline:2px solid var(--a)}
 .sc.on{border-color:var(--a);box-shadow:0 0 0 3px #f5a52433}.sc:active{transform:scale(.97)}
 .ex-i{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex:none}
 .pl{margin-left:auto;width:38px;height:38px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;flex:none}.pl svg{width:16px;height:16px}
+.fgc{background:var(--s);border-radius:22px;margin-top:14px;padding:10px 12px 12px;text-align:center}.fg svg{width:100%;max-width:300px;height:170px}.rd{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;margin-right:6px}
+.pr{font-size:96px;font-weight:800;line-height:1.1;color:var(--a);animation:pp 1s ease-out infinite}@keyframes pp{0%{transform:scale(1.5);opacity:0}30%{opacity:1}100%{transform:scale(1)}}
+.mdl{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;z-index:999;padding:24px}.mb{background:var(--s);border-radius:22px;padding:24px;max-width:340px;width:100%;text-align:center}.mb p{margin:10px 0 18px}
 .se-h{border-radius:24px;padding:14px 18px 22px;text-align:center;color:#fff}
 .se-h h1{font-size:24px;margin-top:6px}.se-h p{margin-top:6px;font-size:14px;opacity:.85;line-height:1.4}.se-ic{display:block;font-size:56px;margin-top:6px}
 .se-x{display:block;background:#0000004d;border:0;color:#fff;border-radius:99px;padding:8px 14px;font-weight:600}
@@ -540,16 +543,59 @@ ${fs!="all"?'<p class="m" style="margin-top:8px">Toca el deporte otra vez para v
 <h2>${fs=="all"?"Todos los deportes":SP[fs][1]}, ${L.length} ejercicios</h2>
 ${L.map(([e,i])=>`<div class="card ex" onclick="start(${i})"><span class="ex-i" style="background:linear-gradient(135deg,${GR[e.sp][0]},${GR[e.sp][1]})">${e.ic}</span><div><b>${e.n}</b><div class="m">${e.s} series de ${e.r}, ~${Math.ceil(e.s*(40+e.d)/60)} min, +${30+e.s*10} XP</div></div><span class="pl">${PL}</span></div>`).join("")}`}
 const sf=k=>{fs=fs==k?"all":k;train()},pf=k=>{fp=k;train()};
-function start(i){q={e:E[i],s:1,r:0,t:0,rest:0,run:true};$("ses").style.display="block";clearInterval(tm);tm=setInterval(tick,1000);draw()}
-function tick(){if(!q||!q.run)return;if(q.rest>0){if(--q.rest==0){q.s++;q.r=0;navigator.vibrate&&navigator.vibrate(200)}}else q.t++;draw()}
-function rep(){if(q.rest>0)return;if(++q.r>=q.e.r){if(q.s>=q.e.s)return fin();q.rest=q.e.d}draw()}
-function draw(){const{e,s,r,t,rest}=q,g=GR[e.sp];
+/* ---------- Figura animada + músculos ---------- */
+const ST=[100,28,100,44,100,84,101,110,100,134,99,110,98,134,100,66,100,86,98,66,98,86],
+M={squat:[ST,[90,48,92,62,72,98,114,94,100,134,110,94,96,134,108,66,122,64,106,66,120,64]],
+lunge:[ST,[100,34,100,50,98,96,128,98,130,134,74,118,58,134,100,70,100,90,98,70,98,90]],
+pushup:[[38,78,52,84,110,104,146,116,178,128,146,116,178,128,54,108,54,128,54,108,54,128],[38,110,52,114,110,116,146,122,178,128,146,122,178,128,76,108,54,128,76,108,54,128]],
+plank:[[38,96,52,102,112,112,148,120,180,128,148,120,180,128,56,124,76,126,56,124,76,126],[38,92,52,98,112,106,148,116,180,128,148,116,180,128,56,124,76,126,56,124,76,126]],
+climber:[[38,96,52,102,112,112,148,120,180,128,148,120,180,128,56,124,76,126,56,124,76,126],[38,96,52,102,112,112,92,108,86,126,148,120,180,128,56,124,76,126,56,124,76,126]],
+crunch:[[38,120,52,124,108,124,140,98,162,128,140,98,162,128,46,110,40,118,46,110,40,118],[72,86,80,98,108,124,140,98,162,128,140,98,162,128,92,100,110,94,92,100,110,94]],
+bridge:[[38,120,52,124,108,124,140,98,162,128,140,98,162,128,66,126,90,126,66,126,90,126],[38,120,52,124,98,88,140,98,162,128,140,98,162,128,66,126,90,126,66,126,90,126]],
+curl:[ST,[100,28,100,44,100,84,101,110,100,134,99,110,98,134,100,66,114,48,98,66,112,48]],
+press:[[100,28,100,44,100,84,101,110,100,134,99,110,98,134,108,60,110,42,106,60,108,42],[100,28,100,44,100,84,101,110,100,134,99,110,98,134,102,26,102,6,100,26,100,6]],
+pull:[[100,56,100,70,100,108,101,126,100,144,99,126,98,144,100,40,100,12,100,40,100,12],[100,30,100,44,100,82,101,100,100,120,99,100,98,120,116,30,100,12,116,30,100,12]],
+jump:[[92,40,94,54,88,92,110,104,100,134,108,104,98,134,104,66,112,84,102,66,110,84],[100,2,100,18,100,58,104,76,100,100,98,76,96,100,108,34,112,12,106,34,110,12]],
+run:[[104,30,102,46,98,84,122,96,124,124,80,104,62,120,112,64,124,56,90,66,80,82],[104,30,102,46,98,84,80,104,62,120,122,96,124,124,90,66,80,82,112,64,124,56]],
+hinge:[ST,[144,64,130,70,86,82,92,108,92,134,90,108,90,134,130,96,128,120,130,96,128,120]],
+heel:[ST,[100,18,100,34,100,74,100,100,100,134,100,100,100,134,100,56,100,76,100,56,100,76]],
+arm:[[100,28,100,44,100,84,106,108,104,134,96,108,96,134,112,64,128,84,112,64,128,84],[100,28,100,44,100,84,106,108,104,134,96,108,96,134,114,46,126,24,114,46,126,24]]},
+SG=[[2,5,9,"q",1],[5,6,7,"c",1],[1,9,7,"b",1],[9,10,6,"b",1],[1,2,13,"t",0],[2,3,9,"q",0],[3,4,7,"c",0],[1,7,7,"b",0],[7,8,6,"b",0]],
+MR=[[/escalador/,"climber","tq"],[/curl femoral|curl nórdico/,"hinge","q"],[/dominada|jalón|face pull|retracción|pullover/,"pull","tb"],[/curl|bíceps|martillo|predicador/,"curl","b"],
+[/lagartija|flexion|press de banca|press de pecho|press inclinado|aperturas|fondos|francés|svend|palmada/,"pushup","tb"],
+[/press de hombro|press militar|arnold|elevaciones|remo al mentón|encogimientos|tríceps/,"press","b"],
+[/plancha|oso|cangrejo|pájaro|dead bug|gato|rueda/,"plank","t"],[/abdominal|crunch|elevación de piernas|tijeras|giro ruso|rotación de tronco|pallof|colgado/,"crunch","t"],
+[/puente|hip thrust|extensión de cadera|patada de glúteo/,"bridge","q"],[/peso muerto|buenos días|swing|remo|lumbar|leñador|hachazo|trineo|arrastre/,"hinge","tq"],
+[/talones|pantorrilla|tobillos/,"heel","c"],[/zancada|búlgara|subidas? al cajón/,"lunge","q"],
+[/salto|burpee|jumping|rana|cuerda|vallas|bloqueo|rebote/,"jump","qc"],[/sentadilla|prensa|hack|goblet|sumo|esquiador|aductores|abductores|cuádriceps/,"squat","q"],
+[/dribleo|tiro|lanzamiento|saque|remate|golpeo|dedos|antebrazo|bandeja|boxeo|pase.*mano|pases de pecho|recepción|reacción|rotación externa|autopases/,"arm","b"]];
+function mvOf(n){n=n.toLowerCase();for(const[r,m,u]of MR)if(r.test(n))return[m,u];return["run","qc"]}
+function fig(){const t=(q.ph/1100)%2,u=t<1?t:2-t,e=(1-Math.cos(Math.PI*u))/2,[A,B]=M[q.m],p=A.map((a,k)=>a+(B[k]-a)*e),X=k=>p[2*k].toFixed(1),Y=k=>p[2*k+1].toFixed(1);
+let s='<svg viewBox="0 0 200 150"><line x1="10" y1="140" x2="190" y2="140" stroke="#ffffff22" stroke-width="3" stroke-linecap="round"/>';
+for(const[a,b,w,g,n]of SG){const c=`x1="${X(a)}" y1="${Y(a)}" x2="${X(b)}" y2="${Y(b)}" stroke-linecap="round"`;
+s+=`<line ${c} stroke="#94a3b8" stroke-width="${w}" opacity="${n?.5:1}"/>`;if(q.u.includes(g))s+=`<line ${c} stroke="#ef4444" stroke-width="${w-2}" opacity="${((n?.4:.6)+.4*e).toFixed(2)}"/>`}
+if(q.u.includes("q"))s+=`<circle cx="${X(2)}" cy="${Y(2)}" r="9" fill="#ef4444" opacity="${(.5+.4*e).toFixed(2)}"/>`;
+return s+`<circle cx="${X(0)}" cy="${Y(0)}" r="10" fill="#cbd5e1"/></svg>`}
+let fr=0,lt=0;function loop(ts){if(!q)return;const d=lt?Math.min(ts-lt,100):0;lt=ts;if(q.run&&!q.ask)q.ph+=d;const g=$("fg");if(g)g.innerHTML=fig();fr=requestAnimationFrame(loop)}
+let ac;function beep(f,ms){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=.12;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+ms/1000)}catch(e){}}
+const PRE=()=>+localStorage.getItem("sportx_prep")||5,setPre=s=>{localStorage.setItem("sportx_prep",s);q.prep=s;draw()};
+const RS=SV+'<path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>',MU={q:"Piernas y glúteos",c:"Pantorrillas",b:"Brazos y hombros",t:"Torso y core"};
+function askRs(){q.was=q.run;q.run=false;q.ask=true;draw()}
+function noRs(){q.ask=false;q.run=q.was;draw()}
+function okRs(){q.s=1;q.r=0;q.t=0;q.rest=0;q.ask=false;q.run=true;q.prep=PRE();draw()}
+function start(i){const[m,u]=mvOf(E[i].n);q={e:E[i],s:1,r:0,t:0,rest:0,run:true,prep:PRE(),m,u,ph:0};$("ses").style.display="block";clearInterval(tm);tm=setInterval(tick,1000);cancelAnimationFrame(fr);lt=0;fr=requestAnimationFrame(loop);draw()}
+function tick(){if(!q||!q.run)return;if(q.prep>0){q.prep--;beep(q.prep?660:990,q.prep?90:300);if(!q.prep)navigator.vibrate&&navigator.vibrate(300)}else if(q.rest>0){if(--q.rest==0){q.s++;q.r=0;navigator.vibrate&&navigator.vibrate(200)}}else q.t++;draw()}
+function rep(){if(q.prep>0||q.rest>0)return;if(++q.r>=q.e.r){if(q.s>=q.e.s)return fin();q.rest=q.e.d}draw()}
+function draw(){const{e,s,r,t,rest,prep}=q;
 $("ses").innerHTML=`<div class="app"><div class="se-h ph ph-${e.sp}"><button class="se-x" onclick="quit()">‹ Salir</button><div><span class="se-ic">${e.ic}</span><h1>${e.n}</h1><p>${e.t}</p></div></div>
-<div class="center"><div class="timer">${mm(rest>0?rest:t)}</div><p class="st">${rest>0?"Descansa, la siguiente serie ya viene":q.run?"En marcha":"En pausa"}</p>
+<div class="fgc"><div id="fg" class="fg">${fig()}</div><p class="m"><i class="rd"></i>Músculos: ${[...q.u].map(k=>MU[k]).join(" · ")}</p></div>
+<div class="center">${prep>0?`<p class="st" style="font-size:20px;margin-bottom:0">¡Prepárate!</p><div class="pr">${prep}</div><p class="m">Colócate en posición, empezamos en ${prep} s</p><div class="chips" style="justify-content:center;margin:12px 0"><button class="chip ${PRE()==5?"on":""}" onclick="setPre(5)">5 s</button><button class="chip ${PRE()==10?"on":""}" onclick="setPre(10)">10 s</button></div><button class="btn" onclick="q.prep=0;draw()">Empezar ya</button>`
+:`<div class="timer">${mm(rest>0?rest:t)}</div><p class="st">${rest>0?"Descansa, la siguiente serie ya viene":q.run?"En marcha":"En pausa"}</p>
 <div class="se-dots">${Array.from({length:e.s},(_,k)=>`<i class="${k<s-1?"dn":k==s-1?"cur":""}"></i>`).join("")}</div>
 <div class="row"><div class="card stat"><b>${s}/${e.s}</b><span>Serie</span></div><div class="card stat"><b>${r}/${e.r}</b><span>Repetición</span></div></div>
-<button class="btn" onclick="rep()">Repetición hecha</button>
-<button class="pz" onclick="q.run=!q.run;draw()" aria-label="${q.run?"Pausar":"Seguir"}">${q.run?PA:PY}</button></div></div>`}
+<button class="btn" onclick="rep()">Repetición hecha</button>`}
+<div style="display:flex;justify-content:center;gap:18px"><button class="pz" style="margin-left:0;margin-right:0" onclick="q.run=!q.run;draw()" aria-label="${q.run?"Pausar":"Seguir"}">${q.run?PA:PY}</button><button class="pz" style="margin-left:0;margin-right:0" onclick="askRs()" aria-label="Reiniciar">${RS}</button></div></div>
+${q.ask?`<div class="mdl"><div class="mb"><b style="font-size:19px">¿Reiniciar el ejercicio?</b><p class="m">Se perderá el avance de esta sesión: series, repeticiones y tiempo.</p><div class="row"><button class="btn" style="background:var(--s2);color:var(--t,#fff)" onclick="noRs()">Cancelar</button><button class="btn" onclick="okRs()">Aceptar</button></div></div></div>`:""}</div>`}
 async function fin(){clearInterval(tm);const e=q.e,t=q.t,xp=30+e.s*10,b=tot(),bi=rk(b),bl=lv(b);q=null;let fail="";
 $("ses").innerHTML='<div class="app center"><p class="m">Guardando…</p></div>';
 try{if(U){const w={id:newId(),exercise:e.n,sport:SP[e.sp][1],place:e.pl,series:e.s,reps:e.r,durationSec:t,xp,at:Date.now()};qSet(qGet().concat(w));applyLocal(w);cacheSet();sync()}
