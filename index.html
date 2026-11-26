@@ -92,6 +92,18 @@ input:focus{outline:2px solid var(--a)}
 .se-dots{display:flex;justify-content:center;gap:8px;margin-bottom:16px}.se-dots i{width:28px;height:6px;border-radius:9px;background:#ffffff1f}.se-dots i.dn{background:var(--b)}.se-dots i.cur{background:var(--a)}
 .pz{display:flex;align-items:center;justify-content:center;width:76px;height:76px;border-radius:50%;border:0;background:var(--s2);margin:18px auto 0;box-shadow:0 0 0 2px var(--a)}
 .pz svg{fill:var(--a)}
+.seg{display:flex;background:var(--s);border-radius:14px;padding:4px;gap:4px}.seg button{flex:1;border:0;background:0;color:var(--m);padding:10px;border-radius:11px;font-weight:700;font-size:15px}.seg button.on{background:var(--a);color:#1a1200}
+.pdc{background:linear-gradient(160deg,#1f2a47,#141b2e);border:1px solid #ffffff12;border-radius:24px;padding:6px 14px 0;overflow:hidden}
+.pod{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:16px 0 0}
+.pc{flex:1;max-width:110px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;min-width:0}
+.pc b{font-size:13px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pc em{font-style:normal;font-size:12px;color:var(--m)}.pc.you b{color:var(--a)}
+.pav{width:52px;height:52px;font-size:22px;margin-bottom:6px}.pav.f{width:64px;height:64px;font-size:26px}
+.pb{width:100%;border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;margin-top:6px}
+.rw{display:flex;align-items:center;gap:12px;padding:10px;border-radius:14px}.rw>b{width:24px;text-align:center;color:var(--m)}.rw.you{background:var(--s2);outline:1px solid var(--a)}
+.rw>em{font-style:normal;font-weight:700;font-size:14px}.rw .av{flex:none}
+.rn{display:flex;align-items:center;gap:8px;font-weight:600}.rn span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge.sm{font-size:11px;padding:2px 8px}.bar.sm{height:6px;margin:6px 0 0}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.rs{text-align:center;margin:0;display:flex;flex-direction:column;align-items:center;gap:4px}
 </style></head><body>
 <main id="main" class="app"></main><div id="ses"></div>
 <div id="auth"><div class="lg"><div class="lg-in"><div class="lg-logo"><svg width="44" height="44" viewBox="0 0 24 24" fill="#1a1200"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></div><h1 class="lg-h">SPORT<span>X</span></h1><p class="lg-tag">Cargando…</p></div></div></div>
@@ -238,13 +250,18 @@ ${lv(a)>bl?`<p class="st">¡Subiste al nivel ${lv(a)}!</p>`:""}${rk(a)>bi?`<p cl
 const closeS=t=>{$("ses").style.display="none";go(t||"train")},quit=()=>{clearInterval(tm);q=null;closeS()};
 const rkCard=()=>{const x=tot(),i=rk(x),n=RK[i+1];return`<div class="card" style="margin-top:18px"><span class="badge" style="background:${RK[i][2]}">${RK[i][0]}</span><div class="big">${x} XP</div>
 <div class="bar"><i style="width:${n?(x-RK[i][1])/(n[1]-RK[i][1])*100:100}%"></i></div><p class="m">${n?`Te faltan ${n[1]-x} XP para ${n[0]}`:"Llegaste al rango máximo"}</p></div>`};
+const PC=["#f5a524","#c0c8d8","#cd7f32"];
+function podium(L){return`<div class="pod">${[1,0,2].filter(k=>L[k]).map(k=>{const p=L[k];return`<div class="pc ${p.uid==U.uid?"you":""}"><span class="av pav${k==0?" f":""}" style="box-shadow:0 0 0 3px ${PC[k]}">${av(p)}</span><b>${esc(p.name)}</b><em>${p.x} XP</em><div class="pb" style="height:${[96,72,56][k]}px;background:linear-gradient(180deg,${PC[k]}55,${PC[k]}11);border-top:3px solid ${PC[k]}">${k+1}</div></div>`}).join("")}</div>`}
+function rows(L){const mx=Math.max(...L.map(p=>p.x),1);return L.slice(3).map((p,j)=>{const r=RK[rk(p.x)];return`<div class="rw ${p.uid==U.uid?"you":""}"><b>${j+4}</b><span class="av">${av(p)}</span><div style="flex:1;min-width:0"><div class="rn"><span>${esc(p.name)}</span><span class="badge sm" style="background:${r[2]}">${r[0]}</span></div><div class="bar sm"><i style="width:${p.x/mx*100}%"></i></div></div><em>${p.x} XP</em></div>`}).join("")}
+function ownRow(){const v=V(),x=rs=="global"?tot():v.xp[Object.keys(GK).find(k=>GK[k]==rs)];return`<div class="card" style="margin-top:10px"><div class="rw you"><b>–</b><span class="av">${av(v)}</span><div style="flex:1"><div class="rn"><span>${esc(v.name)}</span></div><p class="m">${x?"Fuera del top 20":"Entrena para entrar al ranking"}</p></div><em>${x} XP</em></div></div>`}
 async function rank(){const ch=(a,c,f)=>a.map(([k,l])=>`<button class="chip ${c==k?"on":""}" onclick="${f}('${k}')">${l}</button>`).join("");
-$("main").innerHTML=`<h1>Ranking</h1>${rkCard()}<h2>Tu rango en cada deporte</h2>${Object.entries(SP).map(([k,v])=>{const y=V().xp[k],j=rk(y);return`<div class="card sp"><span class="ic">${v[0]}</span><div style="flex:1"><b>${v[1]}</b><div class="m">${y} XP</div></div><span class="badge" style="background:${RK[j][2]}">${RK[j][0]}</span></div>`}).join("")}
-${U?`<h2>Ranking en línea</h2><div class="chips">${ch([["w","🌎 Mundial"],["f","👥 Amigos"]],rt,"stt")}</div>${rt=="w"?`<div class="chips" style="margin-top:8px">${ch([["global","Todos"],...Object.entries(SP).map(([k,v])=>[GK[k],v[0]+" "+v[1]])],rs,"ssp")}</div>`:""}<div id="rl" style="margin-top:12px"><div class="card m">Cargando…</div></div>`
-:'<div class="card m" style="margin-top:12px">Inicia sesión para ver el ranking en línea y competir con tus amigos.</div><button class="btn" onclick="authUI()">Iniciar sesión</button>'}`;
+const sp=`<h2>Tu rango en cada deporte</h2><div class="rg">${Object.entries(SP).map(([k,v])=>{const y=V().xp[k],j=rk(y);return`<div class="card rs"><span style="font-size:28px">${v[0]}</span><b>${v[1]}</b><span class="m">${y} XP</span><span class="badge" style="background:${RK[j][2]}">${RK[j][0]}</span></div>`}).join("")}</div>`;
+$("main").innerHTML=`<h1>Ranking</h1>${U?`<div class="seg" style="margin-top:16px"><button class="${rt=="w"?"on":""}" onclick="stt('w')">Mundial</button><button class="${rt=="f"?"on":""}" onclick="stt('f')">Amigos</button></div>${rt=="w"?`<div class="chips" style="margin-top:10px">${ch([["global","Todos"],...Object.entries(SP).map(([k,v])=>[GK[k],v[0]+" "+v[1]])],rs,"ssp")}</div>`:""}<div id="rl" style="margin-top:12px"><div class="card m">Cargando…</div></div>`
+:'<div class="card m" style="margin-top:16px">Inicia sesión para ver el ranking en línea y competir con tus amigos.</div><button class="btn" onclick="authUI()">Iniciar sesión</button>'}${rkCard()}${sp}`;
 if(!U)return;const t0=tab;
 try{const L=rt=="w"?(await C.ranking(rs,20)).map(p=>({uid:p.uid,name:p.displayName||p.username,x:p.score,photo:p.photo})):(await C.friendsRanking()).map(p=>({uid:p.uid,name:p.displayName||p.username,x:p.xp,photo:p.photo}));
-if(tab!=t0||!$("rl"))return;$("rl").innerHTML=(L.length?`<div class="card">${L.map((p,k)=>`<div class="lb ${p.uid==U.uid?"you":""}"><b>${["🥇","🥈","🥉"][k]||k+1}</b><span class="av">${av(p)}</span><span>${esc(p.name)}</span><em>${p.x} XP</em></div>`).join("")}</div>`:'<div class="card m">Todavía nadie tiene XP aquí. ¡Sé el primero!</div>')+(rt=="f"?await friendsUI():"")}
+if(tab!=t0||!$("rl"))return;
+$("rl").innerHTML=(L.length?`<div class="card pdc">${podium(L)}</div>`+(L.length>3?`<div class="card" style="margin-top:10px">${rows(L)}</div>`:""):'<div class="card m">Todavía nadie tiene XP aquí. ¡Sé el primero!</div>')+(rt=="w"&&!L.some(p=>p.uid==U.uid)?ownRow():"")+(rt=="f"?await friendsUI():"")}
 catch(e){if($("rl"))$("rl").innerHTML=`<div class="card m">No se pudo cargar: ${esc(e.code||e.message)}</div>`}}
 const stt=k=>{rt=k;rank()},ssp=k=>{rs=k;rank()};
 async function friendsUI(){const f=await C.friendships(),inc=f.filter(x=>x.incoming&&x.other);
