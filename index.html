@@ -86,7 +86,7 @@ input:focus{outline:2px solid var(--a)}
 .sc.on{border-color:var(--a);box-shadow:0 0 0 3px #f5a52433}.sc:active{transform:scale(.97)}
 .ex-i{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex:none}
 .pl{margin-left:auto;width:38px;height:38px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;flex:none}.pl svg{width:16px;height:16px}
-.fg{background:#eef4f2;border-radius:16px;overflow:hidden}.fgc{background:var(--s);border-radius:22px;margin-top:14px;padding:10px 12px 12px;text-align:center}.fg svg{width:100%;max-width:300px;height:170px}.rd{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;margin-right:6px}
+.fg{background:radial-gradient(circle at 50% 38%,#eef0f2,#cfd3d8);border-radius:16px;overflow:hidden}.fgc{background:var(--s);border-radius:22px;margin-top:14px;padding:10px 12px 12px;text-align:center}.fg svg{width:100%;max-width:300px;height:170px}.rd{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;margin-right:6px}
 .pr{font-size:96px;font-weight:800;line-height:1.1;color:var(--a);animation:pp 1s ease-out infinite}@keyframes pp{0%{transform:scale(1.5);opacity:0}30%{opacity:1}100%{transform:scale(1)}}
 .mdl{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;z-index:999;padding:24px}.mb{background:var(--s);border-radius:22px;padding:24px;max-width:340px;width:100%;text-align:center}.mb p{margin:10px 0 18px}
 .se-h{border-radius:24px;padding:14px 18px 22px;text-align:center;color:#fff}
@@ -571,19 +571,27 @@ MR=[[/escalador/,"climber","tq"],[/curl femoral|curl nórdico/,"hinge","q"],[/do
 [/dribleo|tiro|lanzamiento|saque|remate|golpeo|dedos|antebrazo|bandeja|boxeo|pase.*mano|pases de pecho|recepción|reacción|rotación externa|autopases/,"arm","b"]];
 function mvOf(n){n=n.toLowerCase();for(const[r,m,u]of MR)if(r.test(n))return[m,u];return["run","qc"]}
 function fig(){const t=(q.ph/1100)%2,u=t<1?t:2-t,e=(1-Math.cos(Math.PI*u))/2,[A,B]=M[q.m],p=A.map((a,k)=>a+(B[k]-a)*e),X=k=>p[2*k],Y=k=>p[2*k+1],f=v=>v.toFixed(1),
-lying=/pushup|plank|climber/.test(q.m),sup=/crunch|bridge/.test(q.m),d=(!sup&&X(0)<X(2)-20)?-1:1,
-L=(a,b,w,c,o)=>`<line x1="${f(a[0])}" y1="${f(a[1])}" x2="${f(b[0])}" y2="${f(b[1])}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"${o?` opacity="${o}"`:""}/>`,
-P_=k=>[X(k),Y(k)],md=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],R=(a,b,w,g,n)=>q.u.includes(g)?L(a,b,w-3,"#ef4444",((n?.3:.45)+.35*e).toFixed(2)):"",
-H=P_(0),N=P_(1),Pp=P_(2),SKN="#f1c6a4",SKD="#e0a684",SHIRT="#1b1d21",SHIRT2="#2c2f35",NAVY="#183c55",HAIR="#17384e";
-const leg=(kk,ff,far)=>{const k=P_(kk),fo=P_(ff),sk=far?SKD:SKN,sx=lying?0:d*9;
-return L(Pp,k,14,sk)+L(Pp,md(Pp,k,.62),16,far?"#12293b":NAVY)+L(k,fo,10,sk)+L(fo,[fo[0]+sx,fo[1]],8,far?"#0f2433":"#12303f")+(lying?"":L([fo[0]-2,fo[1]+3.6],[fo[0]+sx+1,fo[1]+3.6],2,"#dfe8ec"))+R(Pp,k,14,"q",far)+R(k,fo,9.5,"c",far)},
-arm=(ee,hh,far)=>{const e_=P_(ee),h_=P_(hh),sl=far?SHIRT2:SHIRT;return L(N,e_,11,sl)+L(e_,h_,9,sl)+`<circle cx="${f(h_[0])}" cy="${f(h_[1])}" r="5.6" fill="${far?SKD:SKN}"/>`+R(N,e_,11,"b",far)+R(e_,h_,9,"b",far)};
-const hx=H[0],hy=H[1],hd=`<g transform="translate(${f(hx)} ${f(hy)}) scale(1.22) translate(${f(-hx)} ${f(-hy)})"><circle cx="${f(hx-d*7)}" cy="${f(hy+3)}" r="3.2" fill="${SKD}"/><circle cx="${f(hx)}" cy="${f(hy)}" r="11.2" fill="${SKN}"/>
-<path d="M${f(hx-12.4)} ${f(hy-1)}A12.4 12.4 0 0 1 ${f(hx+12.4)} ${f(hy-1)}Q${f(hx+d*6)} ${f(hy-6)} ${f(hx-d*1)} ${f(hy-4)}Z" fill="${HAIR}"/><circle cx="${f(hx+d*4.5)}" cy="${f(hy-10.5)}" r="7" fill="${HAIR}"/><circle cx="${f(hx-d*8)}" cy="${f(hy-1)}" r="4.8" fill="${HAIR}"/>
-<path d="M${f(hx+d*3)} ${f(hy-3.6)}L${f(hx+d*9)} ${f(hy-4.6)}" stroke="${HAIR}" stroke-width="1.8" stroke-linecap="round"/><circle cx="${f(hx+d*6.3)}" cy="${f(hy-.3)}" r="1.5" fill="#14202b"/>
-<path d="M${f(hx+d*10.6)} ${f(hy-.5)}L${f(hx+d*14)} ${f(hy+3.8)}L${f(hx+d*10.4)} ${f(hy+4.6)}Z" fill="${SKN}" stroke="${SKD}" stroke-width=".8" stroke-linejoin="round"/><path d="M${f(hx+d*5)} ${f(hy+6.8)}L${f(hx+d*8.6)} ${f(hy+6.8)}" stroke="#b66a55" stroke-width="1.4" stroke-linecap="round"/></g>`;
-let s=`<svg viewBox="0 0 200 150"><ellipse cx="${f((X(1)+X(4)+X(6))/3)}" cy="141" rx="64" ry="4.5" fill="#7fa9ba" opacity=".6"/><ellipse cx="156" cy="22" rx="20" ry="7" fill="#a9c8d4"/><ellipse cx="30" cy="30" rx="13" ry="5" fill="#a9c8d4"/>`;
-s+=leg(5,6,1)+arm(9,10,1)+L(N,Pp,29,SHIRT)+L(md(N,Pp,.18),md(N,Pp,.18),0,"none")+R(N,Pp,29,"t",0)+L(N,md(N,H,.8),8.5,SKN)+`<circle cx="${f(Pp[0])}" cy="${f(Pp[1])}" r="15" fill="${NAVY}"/>`+(q.u.includes("q")?`<circle cx="${f(Pp[0])}" cy="${f(Pp[1])}" r="9" fill="#ef4444" opacity="${(.45+.4*e).toFixed(2)}"/>`:"")+leg(3,4,0)+arm(7,8,0)+hd;
+lying=/pushup|plank|climber/.test(q.m),sup=/crunch|bridge/.test(q.m),d=(!sup&&X(0)<X(2)-20)?-1:1,P_=k=>[X(k),Y(k)],H=P_(0),N=P_(1),Pp=P_(2),
+sb=(a,b)=>[b[0]-a[0],b[1]-a[1]],ln=v=>Math.hypot(v[0],v[1])||1,fn=(a,b)=>{const v=sb(a,b),l=ln(v);return[v[1]*d/l,-v[0]*d/l]},
+NA=["#a9afb7","#cbd0d5","#eceff1"],FA=["#868d96","#a3a9b1","#c1c6cb"],
+cy=(a,b,w0,w1,far)=>{const v=sb(a,b),l=ln(v),n=[-v[1]/l,v[0]/l],ls=(-n[0]-n[1])>=0?1:-1,C=far?FA:NA;let s="";
+[[1,0],[.68,.26],[.3,.42]].forEach(([k,sh],ix)=>{const o=ls*sh,pt=(c,w,sg)=>[c[0]+n[0]*(o*w/2+sg*k*w/2),c[1]+n[1]*(o*w/2+sg*k*w/2)],q1=pt(a,w0,1),q2=pt(b,w1,1),q3=pt(b,w1,-1),q4=pt(a,w0,-1),ca=pt(a,w0,0),cb=pt(b,w1,0);
+s+=`<path d="M${f(q1[0])} ${f(q1[1])}L${f(q2[0])} ${f(q2[1])}L${f(q3[0])} ${f(q3[1])}L${f(q4[0])} ${f(q4[1])}Z" fill="${C[ix]}"/><circle cx="${f(ca[0])}" cy="${f(ca[1])}" r="${f(k*w0/2)}" fill="${C[ix]}"/><circle cx="${f(cb[0])}" cy="${f(cb[1])}" r="${f(k*w1/2)}" fill="${C[ix]}"/>`});return s},
+mu=(a,b,tt,rl,rw,off,g,far)=>{const v=sb(a,b),l=ln(v),n=fn(a,b),c=[a[0]+v[0]*tt+n[0]*off,a[1]+v[1]*tt+n[1]*off],on=q.u.includes(g);
+return`<ellipse cx="${f(c[0])}" cy="${f(c[1])}" rx="${f(rl*l)}" ry="${f(rw)}" transform="rotate(${f(Math.atan2(v[1],v[0])*180/Math.PI)} ${f(c[0])} ${f(c[1])})" fill="url(#${on?"mr":far?"mf":"mg"})"${on?` opacity="${(.8+.2*e).toFixed(2)}"`:""}/>`},
+leg=(kk,ff,far)=>{const k=P_(kk),fo=P_(ff);return cy(Pp,k,20,13,far)+cy(k,fo,12.5,8,far)+(lying?`<circle cx="${f(fo[0])}" cy="${f(fo[1])}" r="5.2" fill="${(far?FA:NA)[0]}"/>`:`<ellipse cx="${f(fo[0]+d*5)}" cy="${f(fo[1]+2.5)}" rx="9" ry="3.8" fill="${(far?FA:NA)[0]}"/>`)
++mu(Pp,k,.5,.38,8.2,3.6,"q",far)+mu(Pp,k,.5,.36,6.8,-4.2,"q",far)+mu(k,fo,.32,.3,6.4,-3.2,"c",far)+mu(k,fo,.58,.26,3,2.6,"c",far)},
+arm=(ee,hh,far)=>{const e_=P_(ee),h_=P_(hh);return cy(N,e_,13,9.5,far)+cy(e_,h_,9.5,6.2,far)+`<circle cx="${f(h_[0])}" cy="${f(h_[1])}" r="4.6" fill="${(far?FA:NA)[0]}"/>`
++mu(N,e_,.08,.4,8.6,0,"b",far)+mu(N,e_,.5,.36,5.6,2.8,"b",far)+mu(N,e_,.5,.36,5,-2.8,"b",far)+mu(e_,h_,.4,.36,4.8,1.4,"b",far)};
+const hx=H[0],hy=H[1];
+let s=`<svg viewBox="0 0 200 165"><defs><radialGradient id="mr" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#ff9d6e"/><stop offset=".55" stop-color="#e2492a"/><stop offset="1" stop-color="#9a1e12"/></radialGradient>
+<radialGradient id="mg" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#eef0f3"/><stop offset=".6" stop-color="#c9ced4"/><stop offset="1" stop-color="#9aa1a9"/></radialGradient>
+<radialGradient id="mf" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#d2d6db"/><stop offset=".6" stop-color="#aeb4bb"/><stop offset="1" stop-color="#7f868f"/></radialGradient>
+<radialGradient id="hg" cx=".38" cy=".3" r=".85"><stop offset="0" stop-color="#f4f5f7"/><stop offset=".65" stop-color="#c7ccd2"/><stop offset="1" stop-color="#9097a0"/></radialGradient></defs>
+<ellipse cx="${f((X(1)+X(4)+X(6))/3)}" cy="143" rx="62" ry="4.5" fill="#000" opacity=".16"/>`;
+s+=leg(5,6,1)+arm(9,10,1)+cy(N,Pp,36,26,0)+mu(N,Pp,.2,.24,8.6,5.5,"t")+mu(N,Pp,.58,.3,6.8,6,"t")+mu(N,Pp,.4,.34,8.6,-6.5,"t")+mu(N,Pp,1,.26,11.5,-7,"q")+leg(3,4,0)+arm(7,8,0)
++cy(N,[N[0]+(hx-N[0])*.75,N[1]+(hy-N[1])*.75],11,10,0)+`<circle cx="${f(hx)}" cy="${f(hy)}" r="12.5" fill="url(#hg)"/>`
++`<text x="100" y="155" text-anchor="middle" font-size="6.5" font-weight="700" fill="#fff" opacity=".85" font-family="system-ui,sans-serif" style="letter-spacing:1px">SPORTX · ${q.e.s} SERIES</text><text x="100" y="164" text-anchor="middle" font-size="12" font-weight="800" fill="#f6f7f8" stroke="#8d949c" stroke-width=".5" style="paint-order:stroke" font-family="system-ui,sans-serif">${q.e.s}X${q.e.r}</text>`;
 return s+"</svg>"}
 let fr=0,lt=0;function loop(ts){if(!q)return;const d=lt?Math.min(ts-lt,100):0;lt=ts;if(q.run&&!q.ask)q.ph+=d;const g=$("fg");if(g)g.innerHTML=fig();fr=requestAnimationFrame(loop)}
 let ac;function beep(f,ms){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=.12;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+ms/1000)}catch(e){}}
