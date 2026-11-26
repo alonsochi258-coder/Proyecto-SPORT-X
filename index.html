@@ -80,6 +80,18 @@ input:focus{outline:2px solid var(--a)}
 .ct{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
 .wk{display:flex;gap:8px;height:110px}.wc{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--m)}.wb{flex:1;width:100%;background:#ffffff0a;border-radius:10px;display:flex;align-items:flex-end;overflow:hidden}.wb i{display:block;width:100%;background:linear-gradient(180deg,var(--b),#0f766e);border-radius:10px}.wb i.td{background:linear-gradient(180deg,#ffc14d,var(--a))}
 .qa{display:flex;gap:10px;margin-top:12px}.qa button{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:16px;padding:16px;font-size:16px;font-weight:700}.qa-p{background:var(--a);color:#1a1200}.qa-s{background:var(--s2);color:var(--t)}.qa button:active{transform:scale(.97)}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sc{position:relative;text-align:left;border:2px solid transparent;border-radius:20px;padding:14px;color:#fff;min-height:104px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+.sc span{position:absolute;top:8px;right:12px;font-size:40px}.sc b{font-size:17px}.sc em{font-style:normal;font-size:12px;opacity:.8}
+.sc.on{border-color:var(--a);box-shadow:0 0 0 3px #f5a52433}.sc:active{transform:scale(.97)}
+.ex-i{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex:none}
+.pl{margin-left:auto;width:38px;height:38px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;flex:none}.pl svg{width:16px;height:16px}
+.se-h{border-radius:24px;padding:14px 18px 22px;text-align:center;color:#fff}
+.se-h h1{font-size:24px;margin-top:6px}.se-h p{margin-top:6px;font-size:14px;opacity:.85;line-height:1.4}.se-ic{display:block;font-size:56px;margin-top:6px}
+.se-x{display:block;background:#0000004d;border:0;color:#fff;border-radius:99px;padding:8px 14px;font-weight:600}
+.se-dots{display:flex;justify-content:center;gap:8px;margin-bottom:16px}.se-dots i{width:28px;height:6px;border-radius:9px;background:#ffffff1f}.se-dots i.dn{background:var(--b)}.se-dots i.cur{background:var(--a)}
+.pz{display:flex;align-items:center;justify-content:center;width:76px;height:76px;border-radius:50%;border:0;background:var(--s2);margin:18px auto 0;box-shadow:0 0 0 2px var(--a)}
+.pz svg{fill:var(--a)}
 </style></head><body>
 <main id="main" class="app"></main><div id="ses"></div>
 <div id="auth"><div class="lg"><div class="lg-in"><div class="lg-logo"><svg width="44" height="44" viewBox="0 0 24 24" fill="#1a1200"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></div><h1 class="lg-h">SPORT<span>X</span></h1><p class="lg-tag">Cargando…</p></div></div></div>
@@ -192,19 +204,26 @@ $("main").innerHTML=`<div class="hd"><span class="av hd-av" style="box-shadow:0 
 <div class="card"><div class="ct" style="margin-bottom:0"><b>Meta semanal</b><span class="m">${wd} de ${g} días</span></div><div class="bar"><i style="width:${Math.min(100,wd/g*100)}%"></i></div><p class="m">${wd>=g?"¡Meta cumplida!":`Te faltan ${g-wd} ${g-wd==1?"día":"días"} esta semana`}</p></div>
 <div class="row"><div class="card stat"><b>${v.n}</b><span>Sesiones</span></div><div class="card stat"><b>${Math.round(v.h.reduce((a,r)=>a+r.t,0)/60)}</b><span>Minutos</span></div></div>
 <div class="qa"><button class="qa-p" onclick="go('train')">${IC.bolt}Entrenar ahora</button><button class="qa-s" onclick="go('rank')">${IC.cup}Ranking</button></div>${U?"":'<button class="btn g" onclick="authUI()">Crear cuenta o iniciar sesión</button>'}${instBlock()}`}
+const GR={fut:["#0f766e","#134e4a"],vol:["#b45309","#78350f"],bas:["#c2410c","#7c2d12"],gen:["#3b4fd8","#1e2a6b"]};
+const PL='<svg viewBox="0 0 24 24" fill="#1a1200"><path d="M7 4v16l13-8z"/></svg>',PA='<svg width="30" height="30" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>',PY='<svg width="30" height="30" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg>';
 function train(){const L=E.map((e,i)=>[e,i]).filter(([e])=>(fs=="all"||e.sp==fs)&&(fp=="all"||e.pl==fp));
 const ch=(a,c,f)=>a.map(([k,l])=>`<button class="chip ${c==k?"on":""}" onclick="${f}('${k}')">${l}</button>`).join("");
-$("main").innerHTML=`<h1>Entrenar</h1><h2>Deporte</h2><div class="chips">${ch([["all","Todos"],...Object.entries(SP).map(([k,v])=>[k,v[0]+" "+v[1]])],fs,"sf")}</div>
-<h2>Lugar</h2><div class="chips">${ch([["all","Todos"],["casa","🏠 Casa"],["gym","🏋️ Gimnasio"]],fp,"pf")}</div><h2>${L.length} ejercicios</h2>
-${L.map(([e,i])=>`<div class="card ex" onclick="start(${i})"><span class="ic">${e.ic}</span><div><b>${e.n}</b><div class="m">${SP[e.sp][1]}, ${e.pl=="casa"?"en casa":"en gimnasio"}, ${e.s} series de ${e.r}</div></div><span class="go">›</span></div>`).join("")}`}
-const sf=k=>{fs=k;train()},pf=k=>{fp=k;train()};
+$("main").innerHTML=`<h1>Entrenar</h1><h2>Elige tu deporte</h2><div class="sg">${Object.entries(SP).map(([k,v])=>`<button class="sc ${fs==k?"on":""}" style="background:linear-gradient(135deg,${GR[k][0]},${GR[k][1]})" onclick="sf('${k}')"><span>${v[0]}</span><b>${v[1]}</b><em>${E.filter(e=>e.sp==k).length} ejercicios</em></button>`).join("")}</div>
+${fs!="all"?'<p class="m" style="margin-top:8px">Toca el deporte otra vez para ver todos.</p>':""}
+<h2>Lugar</h2><div class="chips">${ch([["all","Todos"],["casa","🏠 Casa"],["gym","🏋️ Gimnasio"]],fp,"pf")}</div>
+<h2>${fs=="all"?"Todos los deportes":SP[fs][1]}, ${L.length} ejercicios</h2>
+${L.map(([e,i])=>`<div class="card ex" onclick="start(${i})"><span class="ex-i" style="background:linear-gradient(135deg,${GR[e.sp][0]},${GR[e.sp][1]})">${e.ic}</span><div><b>${e.n}</b><div class="m">${e.s} series de ${e.r}, ~${Math.ceil(e.s*(40+e.d)/60)} min, +${30+e.s*10} XP</div></div><span class="pl">${PL}</span></div>`).join("")}`}
+const sf=k=>{fs=fs==k?"all":k;train()},pf=k=>{fp=k;train()};
 function start(i){q={e:E[i],s:1,r:0,t:0,rest:0,run:true};$("ses").style.display="block";clearInterval(tm);tm=setInterval(tick,1000);draw()}
 function tick(){if(!q||!q.run)return;if(q.rest>0){if(--q.rest==0){q.s++;q.r=0;navigator.vibrate&&navigator.vibrate(200)}}else q.t++;draw()}
 function rep(){if(q.rest>0)return;if(++q.r>=q.e.r){if(q.s>=q.e.s)return fin();q.rest=q.e.d}draw()}
-function draw(){const{e,s,r,t,rest}=q;$("ses").innerHTML=`<div class="app"><button class="btn g sm" onclick="quit()">‹ Salir</button><div class="center"><div class="bigic">${e.ic}</div><h1>${e.n}</h1><p class="m" style="margin-top:8px">${e.t}</p>
-<div class="timer">${mm(rest>0?rest:t)}</div><p class="st">${rest>0?"Descansa, la siguiente serie ya viene":q.run?"En marcha":"En pausa"}</p>
+function draw(){const{e,s,r,t,rest}=q,g=GR[e.sp];
+$("ses").innerHTML=`<div class="app"><div class="se-h" style="background:linear-gradient(135deg,${g[0]},${g[1]})"><button class="se-x" onclick="quit()">‹ Salir</button><span class="se-ic">${e.ic}</span><h1>${e.n}</h1><p>${e.t}</p></div>
+<div class="center"><div class="timer">${mm(rest>0?rest:t)}</div><p class="st">${rest>0?"Descansa, la siguiente serie ya viene":q.run?"En marcha":"En pausa"}</p>
+<div class="se-dots">${Array.from({length:e.s},(_,k)=>`<i class="${k<s-1?"dn":k==s-1?"cur":""}"></i>`).join("")}</div>
 <div class="row"><div class="card stat"><b>${s}/${e.s}</b><span>Serie</span></div><div class="card stat"><b>${r}/${e.r}</b><span>Repetición</span></div></div>
-<button class="btn" onclick="rep()">Repetición hecha</button><button class="btn g" onclick="q.run=!q.run;draw()">${q.run?"Pausar":"Seguir"}</button></div></div>`}
+<button class="btn" onclick="rep()">Repetición hecha</button>
+<button class="pz" onclick="q.run=!q.run;draw()" aria-label="${q.run?"Pausar":"Seguir"}">${q.run?PA:PY}</button></div></div>`}
 async function fin(){clearInterval(tm);const e=q.e,t=q.t,xp=30+e.s*10,b=tot(),bi=rk(b),bl=lv(b);q=null;let fail="";
 $("ses").innerHTML='<div class="app center"><p class="m">Guardando…</p></div>';
 try{if(U){await C.saveWorkout({exercise:e.n,sport:SP[e.sp][1],place:e.pl,series:e.s,reps:e.r,durationSec:t});await refresh()}
