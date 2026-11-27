@@ -433,8 +433,8 @@ gen|gym|🧯|Escaladora por intervalos|5|1|60|Un minuto fuerte y uno suave en ca
 gen|gym|🧱|Press de pecho con agarre cerrado|3|10|60|Manos más juntas para cargar el tríceps.
 gen|gym|🦴|Encogimientos de hombros con mancuernas|3|15|45|Sube los hombros hacia las orejas y baja lento.`.split("\n").map(l=>{const a=l.split("|");return{sp:a[0],pl:a[1],ic:a[2],n:a[3],s:+a[4],r:+a[5],d:+a[6],t:a[7]}});
 const RK=[["Bronce",0,"#cd7f32"],["Plata",300,"#c0c8d8"],["Oro",800,"#f5a524"],["Platino",1600,"#2dd4bf"],["Diamante",3000,"#60a5fa"],["Élite",5000,"#c084fc"]];
-const EM={"auth/invalid-email":"El correo no es válido","auth/missing-password":"Escribe tu contraseña","auth/invalid-credential":"Correo o contraseña incorrectos","auth/wrong-password":"Correo o contraseña incorrectos","auth/user-not-found":"Correo o contraseña incorrectos","auth/email-already-in-use":"Ese correo ya tiene cuenta","auth/weak-password":"La contraseña necesita al menos 6 caracteres","auth/popup-closed-by-user":"","auth/cancelled-popup-request":"","auth/network-request-failed":"Sin conexión a internet"};
-const msg=e=>e.code in EM?EM[e.code]:"Error: "+(e.code||e.message);
+const EM={"auth/invalid-email":"El correo no es válido","auth/missing-password":"Escribe tu contraseña","auth/invalid-credential":"Correo o contraseña incorrectos","auth/wrong-password":"Correo o contraseña incorrectos","auth/user-not-found":"Correo o contraseña incorrectos","auth/email-already-in-use":"Ese correo ya tiene cuenta","auth/weak-password":"La contraseña necesita al menos 6 caracteres","auth/popup-closed-by-user":"Se cerró la ventana de Google antes de terminar. Inténtalo otra vez o entra con tu correo","auth/cancelled-popup-request":"","auth/network-request-failed":"Sin conexión a internet","auth/unauthorized-domain":"Este dominio no está autorizado en Firebase. Agrégalo en Authentication > Settings > Authorized domains","auth/popup-blocked":"El navegador bloqueó la ventana de Google. Permite las ventanas emergentes e inténtalo otra vez","auth/operation-not-allowed":"El inicio de sesión con Google no está activado en Firebase (Authentication > Sign-in method)","auth/operation-not-supported-in-this-environment":"Este navegador no permite iniciar sesión con Google. Ábrela en Chrome o entra con tu correo","auth/web-storage-unsupported":"Activa las cookies y el almacenamiento del navegador para iniciar sesión","auth/account-exists-with-different-credential":"Ese correo ya tiene cuenta con otro método. Entra con tu correo o con Google","auth/too-many-requests":"Demasiados intentos. Espera un momento e inténtalo otra vez","auth/user-disabled":"Esta cuenta está deshabilitada","auth/internal-error":"Error interno de Firebase. Inténtalo otra vez","auth/invalid-api-key":"La clave de Firebase (apiKey) no es válida","auth/app-not-authorized":"Esta app no está autorizada para usar Firebase","timeout":"Firebase tardó demasiado en responder. Revisa tu internet e inténtalo otra vez"};
+const msg=e=>{const c=(e&&e.code)||"";return c in EM?EM[c]:"Error: "+(c||(e&&e.message)||e)};
 const fresh=()=>({r:[],xp:{fut:0,vol:0,bas:0,gen:0},name:"Atleta"});
 let S=JSON.parse(localStorage.getItem("sportx2")||"null")||fresh(),tab="home",fs="all",fp="all",q=null,tm=null,dp=null;
 let C=null,U=null,P=null,H=[],am="in",pn="",rt="w",rs="global";
@@ -500,7 +500,13 @@ ${r?'<input id="nm" placeholder="Tu nombre" maxlength="30" autocomplete="name">'
 const er=t=>{const e=$("er");if(e)e.textContent=t};
 async function doAuth(){const em=$("em").value.trim(),pw=$("pw").value;er("");$("go").disabled=true;
 try{if(am=="up"){pn=$("nm").value.trim();await C.emailSignUp(em,pw,pn)}else await C.emailSignIn(em,pw)}catch(e){er(msg(e))}$("go").disabled=false}
-async function gLogin(){er("");try{await C.google()}catch(e){er(msg(e))}}
+const inApp=()=>/FBAN|FBAV|FB_IAB|Instagram|WhatsApp|Messenger|Snapchat|TikTok|Line\/|; wv\)/i.test(navigator.userAgent);
+async function gLogin(){er("");
+if(!navigator.onLine)return er("Sin conexión a internet");
+if(inApp())return er("Google no permite iniciar sesión desde el navegador de esta app. Abre SPORTX en Chrome o entra con tu correo");
+if(!C||!C.google)return er("Firebase no cargó. Revisa tu internet y recarga la página");
+toast("Abriendo Google…");
+try{await C.google()}catch(e){console.error("Login con Google:",e);er(msg(e))}}
 async function forgot(){const em=$("em").value.trim();if(!em)return er("Escribe tu correo y vuelve a presionar");try{await C.resetPassword(em);er("");toast("Te enviamos un correo para cambiar la contraseña")}catch(e){er(msg(e))}}
 function guest(){localStorage.setItem("sportx_guest","1");enter()}
 function enter(){$("auth").style.display="none";go(tab)}
@@ -510,6 +516,7 @@ function boot(){C=window.SportXCloud;
 const lu=localStorage.getItem("sportx_lu"),c=lu&&jget("sportx_c_"+lu,null);
 if(c&&c.P){U={uid:lu,cached:true};P=c.P;H=c.H||[];enter0()}else if(localStorage.getItem("sportx_guest"))enter0();
 if(!C){if(!entered){toast("No se pudo cargar firebase.js");enter0()}return}
+if(C.onRedirectError)C.onRedirectError(e=>{console.error("Login con Google:",e);toast(msg(e));setTimeout(()=>er(msg(e)),800)});
 C.onAuth(async(u,err)=>{if(err){if(!entered){toast("Sin conexión: modo local");enter0()}return}
 if(u){U=u;localStorage.setItem("sportx_lu",u.uid);localStorage.removeItem("sportx_guest");
 try{if(pn){await C.saveProfile({displayName:pn});pn=""}await refresh()}catch(e){if(!P)toast("No se pudo cargar tu perfil: "+(e.code||e.message))}

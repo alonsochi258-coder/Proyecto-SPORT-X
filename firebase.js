@@ -60,7 +60,22 @@ async function onAuth(cb) {
   });
 }
 async function loginWith(provider) { await load(); const r = await A.signInWithPopup(auth, provider); return r.user; }
-const google = async () => { await load(); return loginWith(new A.GoogleAuthProvider()); };
+// Google: popup en el navegador; redirección si la app está instalada (PWA) o el popup está bloqueado.
+const standalone = () => { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } };
+const REDIRECT_CODES = ['auth/popup-blocked', 'auth/operation-not-supported-in-this-environment'];
+const google = async () => {
+  await load();
+  const provider = new A.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  if (standalone()) { await A.signInWithRedirect(auth, provider); return null; }
+  try { return (await A.signInWithPopup(auth, provider)).user; }
+  catch (e) {
+    if (REDIRECT_CODES.includes(e.code)) { await A.signInWithRedirect(auth, provider); return null; }
+    throw e;
+  }
+};
+// Al volver de la redirección, avisa si Google devolvió un error (dominio no autorizado, etc.).
+async function onRedirectError(cb) { try { await load(); await A.getRedirectResult(auth); } catch (e) { cb(e); } }
 const facebook = async () => { await load(); return loginWith(new A.FacebookAuthProvider()); };
 async function emailSignUp(email, password, name) {
   await load();
@@ -183,7 +198,7 @@ async function friendsRanking() {
 }
 
 window.SportXCloud = {
-  onAuth, google, facebook, emailSignUp, emailSignIn, resetPassword, logout, me,
+  onAuth, onRedirectError, google, facebook, emailSignUp, emailSignIn, resetPassword, logout, me,
   getProfile, saveProfile, saveWorkout, history, resetAll, ranking,
   sendFriendRequest, friendships, acceptFriend, removeFriend, friendsRanking,
   util: { calcXp, calcLevel, nextStreak, USERNAME_RE, normSport, slugName, pairId }

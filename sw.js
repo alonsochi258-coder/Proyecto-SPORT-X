@@ -1,7 +1,7 @@
-// SPORTX service worker v3
+// SPORTX service worker v4
 // - La app abre SIEMPRE desde el teléfono (no espera a la red), y se actualiza en segundo plano.
 // - El SDK de Firebase (gstatic) también se guarda, para que la sesión funcione sin internet.
-const C = "sportx-v3";
+const C = "sportx-v4";
 const FILES = ["./", "index.html", "firebase.js", "manifest.json", "icon-192.png", "icon-512.png"];
 const SDK = "https://www.gstatic.com/firebasejs/10.14.1/";
 
