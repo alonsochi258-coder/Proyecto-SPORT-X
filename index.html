@@ -86,7 +86,7 @@ input:focus{outline:2px solid var(--a)}
 .sc.on{border-color:var(--a);box-shadow:0 0 0 3px #f5a52433}.sc:active{transform:scale(.97)}
 .ex-i{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex:none}
 .pl{margin-left:auto;width:38px;height:38px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;flex:none}.pl svg{width:16px;height:16px}
-.fg{background:#eef4f2;border-radius:16px;overflow:hidden;touch-action:none;cursor:grab}.fgc{background:var(--s);border-radius:22px;margin-top:14px;padding:10px 12px 12px;text-align:center}.fg svg{width:100%;max-width:300px;height:170px}.rd{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;margin-right:6px}
+.fg{background:transparent;border-radius:16px;overflow:hidden;touch-action:none;cursor:grab}.fgc{background:var(--s);border-radius:22px;margin-top:14px;padding:10px 12px 12px;text-align:center}.fg svg{width:100%;max-width:300px;height:170px}.rd{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;margin-right:6px}
 .pr{font-size:96px;font-weight:800;line-height:1.1;color:var(--a);animation:pp 1s ease-out infinite}@keyframes pp{0%{transform:scale(1.5);opacity:0}30%{opacity:1}100%{transform:scale(1)}}
 .mdl{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;z-index:999;padding:24px}.mb{background:var(--s);border-radius:22px;padding:24px;max-width:340px;width:100%;text-align:center}.mb p{margin:10px 0 18px}
 .se-h{border-radius:24px;padding:14px 18px 22px;text-align:center;color:#fff}
@@ -584,31 +584,18 @@ lying=/pushup|plank|climber/.test(q.m),sup=/crunch|bridge/.test(q.m),d=(!sup&&X(
 const yw=cam.yaw*Math.PI/180,el=cam.el*Math.PI/180,cY=Math.cos(yw),sY=Math.sin(yw),cP=Math.cos(el),sP=Math.sin(el),
 rv=(x,y,z)=>{const xr=x*cY+z*sY,zr=-x*sY+z*cY;return[xr,y*cP-zr*sP,y*sP+zr*cP]},
 pr=a=>{const[x,y,z]=rv(a[0]-100,a[1]-78,a[2]),k=cam.zm*(1+z*.0025);return[100+x*k,78+y*k,z,k]},
-SKN="#f1c6a4",SKD="#e0a684",NAVY="#183c55",HAIR="#17384e",SHIRT="#1b1d21",OL="#5d626d",I=[],
-add=(z,s)=>I.push([z,s]),
-L=(pa,pb,w,c)=>`<line x1="${f(pa[0])}" y1="${f(pa[1])}" x2="${f(pb[0])}" y2="${f(pb[1])}" stroke="${c}" stroke-width="${f(w*(pa[3]+pb[3])/2)}" stroke-linecap="round"/>`,
-seg=(a,b,w,c,ez=0,ol)=>{const pa=pr(a),pb=pr(b),z=(pa[2]+pb[2])/2+ez;if(ol)add(z-.001,L(pa,pb,w+1.8,ol));add(z,L(pa,pb,w,c))},
-lp=(a,b,t)=>a.map((v,k)=>v+(b[k]-v)*t),P3=k=>[X(k),Y(k),LZ[k]],
-hipP=sg=>[X(2),Y(2),5*sg],shP=sg=>[X(1),Y(1),9*sg];
-[[3,4,1],[5,6,-1]].forEach(([kk,ff,sg])=>{const hp=hipP(sg),kn=P3(kk),fo=P3(ff),nr=sg>0?0:1,md=pr(lp(hp,fo,.5))[2]>0,sk=md?SKN:SKD,sx=lying?0:d*9;
-seg(hp,kn,14,sk);seg(hp,lp(hp,kn,.62),16,md?NAVY:"#12293b",.02);seg(kn,fo,10,sk);seg(fo,[fo[0]+sx,fo[1],fo[2]],8,md?"#12303f":"#0f2433",.02);
-if(!lying)seg([fo[0]-2,fo[1]+3.6,fo[2]],[fo[0]+sx+1,fo[1]+3.6,fo[2]],2,"#dfe8ec",.03)});
-[[7,8,1],[9,10,-1]].forEach(([ee,hh,sg])=>{const s=shP(sg),el_=P3(ee),ha=P3(hh),pa=pr(lp(s,ha,.5)),md=pa[2]>0,c=md?"#2c2f36":"#3d414a";
-seg(s,el_,11,c,0,OL);seg(el_,ha,9,c,0,OL);const ph=pr(ha);add(ph[2]+.04,`<circle cx="${f(ph[0])}" cy="${f(ph[1])}" r="${f(5.6*ph[3])}" fill="${md?SKN:SKD}"/>`)});
-const N=[X(1),Y(1),0],Pp=[X(2),Y(2),0],H=P3(0),pt=pr(lp(N,Pp,.5))[2];
-seg(N,Pp,31,SHIRT,0,OL);const pp=pr(Pp);add(pt+.02,`<circle cx="${f(pp[0])}" cy="${f(pp[1])}" r="${f(15*pp[3])}" fill="${NAVY}"/>`);
-seg(N,lp(N,H,.8),8.5,SKN,.03);
-const C=pr(H),r=13.7*C[3],Fv=rv(d,0,0),Rv=rv(0,0,1),fa=Z0(Fv[2]),fx=Fv[0],fy=Fv[1],rx=Rv[0],ry=Rv[1],ci=(x,y,rr,c,o)=>`<circle cx="${f(x)}" cy="${f(y)}" r="${f(rr)}" fill="${c}"${o!=null&&o<1?` opacity="${o.toFixed(2)}"`:""}/>`,
-ln=(x1,y1,x2,y2,w,c)=>`<line x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}" stroke="${c}" stroke-width="${f(w)}" stroke-linecap="round"/>`,
-cx=C[0],cyy=C[1],vis=Math.max(0,Math.min(1,(fa+.25)*2.5));let hd=ci(cx,cyy,r*.82,SKN);
-[1,-1].forEach(s=>{hd+=ci(cx+rx*s*.95*r-fx*.5*r,cyy+ry*s*.95*r-fy*.5*r+.2*r,.24*r,SKD)});
-if(fa<0)hd+=ci(cx,cyy,r*.86,HAIR,Math.min(1,-fa*2.5));
-hd+=`<ellipse cx="${f(cx)}" cy="${f(cyy-.42*r)}" rx="${f(.9*r)}" ry="${f(.55*r)}" fill="${HAIR}"/>`+ci(cx+fx*.3*r,cyy-.78*r,.5*r,HAIR)+ci(cx-fx*.62*r,cyy+.02*r,.36*r,HAIR);
-if(vis>0){[1,-1].forEach(s=>{const ex=cx+fx*.5*r+rx*s*.34*r,ey=cyy+fy*.5*r+ry*s*.34*r-.02*r;hd+=ci(ex,ey,.11*r,"#14202b",vis)+ln(ex-fx*.1*r,ey-.3*r,ex+fx*.28*r+rx*s*.08*r,ey-.34*r,.14*r,HAIR)});
-hd+=ci(cx+fx*.84*r,cyy+fy*.84*r+.2*r,.15*r,SKN,vis)+ln(cx+fx*.45*r-rx*.2*r,cyy+fy*.45*r+.5*r,cx+fx*.45*r+rx*.2*r,cyy+fy*.45*r+.5*r,.1*r,"#b66a55")}
-add(C[2]+.6,hd);
+BASE="#eef2f7",FAR="#a9b4c4",RED="#ef4444",I=[],add=(z,s)=>I.push([z,s]),lp=(a,b,t)=>a.map((v,k)=>v+(b[k]-v)*t),P3=k=>[X(k),Y(k),LZ[k]],
+N=[X(1),Y(1),0],Pp=[X(2),Y(2),0],H=P3(0),pt=pr(lp(N,Pp,.5))[2],
+L=(pa,pb,w,c,o)=>`<line x1="${f(pa[0])}" y1="${f(pa[1])}" x2="${f(pb[0])}" y2="${f(pb[1])}" stroke="${c}" stroke-width="${f(w*(pa[3]+pb[3])/2)}" stroke-linecap="round"${o?` opacity="${o}"`:""}/>`,
+seg=(a,b,w,g,fc)=>{const pa=pr(a),pb=pr(b),z=(pa[2]+pb[2])/2,nr=fc||z>pt;add(z,L(pa,pb,w,nr?BASE:FAR));if(g&&q.u.includes(g))add(z+.001,L(pa,pb,w-2.6,RED,((nr?.6:.4)+.4*e).toFixed(2)))},
+dot=(a,r,c,dz)=>{const pa=pr(a);add(pa[2]+(dz||0),`<circle cx="${f(pa[0])}" cy="${f(pa[1])}" r="${f(r*pa[3])}" fill="${c}"/>`)};
+[[3,4,1],[5,6,-1]].forEach(([kk,ff,sg])=>{const hp=[X(2),Y(2),5*sg],kn=P3(kk),fo=P3(ff),sx=lying?0:d*8;seg(hp,kn,12,"q");seg(kn,fo,9,"c");seg(fo,[fo[0]+sx,fo[1],fo[2]],6.5,null)});
+[[7,8,1],[9,10,-1]].forEach(([ee,hh,sg])=>{const s=[X(1),Y(1),9*sg],el_=P3(ee),ha=P3(hh);seg(s,el_,8.5,"b");seg(el_,ha,7.5,"b");dot(ha,4.4,pr(lp(s,ha,.5))[2]>pt?BASE:FAR,.002)});
+seg(N,Pp,20,"t",1);seg(N,lp(N,H,.8),7,null,1);
+if(q.u.includes("q")){const pp=pr(Pp);add(pt+.01,`<circle cx="${f(pp[0])}" cy="${f(pp[1])}" r="${f(8.5*pp[3])}" fill="${RED}" opacity="${(.45+.4*e).toFixed(2)}"/>`)}
+dot(H,11,"#f8fafc",.6);
 I.sort((a,b)=>a[0]-b[0]);const sh=pr([100,141,0]);
-return`<svg viewBox="0 0 200 150"><ellipse cx="156" cy="22" rx="20" ry="7" fill="#a9c8d4"/><ellipse cx="30" cy="30" rx="13" ry="5" fill="#a9c8d4"/><ellipse cx="${f(sh[0])}" cy="${f(sh[1])}" rx="${f(64*cam.zm)}" ry="${f(Math.max(4.5,64*cam.zm*Math.abs(sP)))}" fill="#7fa9ba" opacity=".6"/>${I.map(x=>x[1]).join("")}</svg>`}
+return`<svg viewBox="0 0 200 150"><ellipse cx="${f(sh[0])}" cy="${f(sh[1])}" rx="${f(64*cam.zm)}" ry="${f(Math.max(4,64*cam.zm*Math.abs(sP)))}" fill="#fff" opacity=".1"/>${I.map(x=>x[1]).join("")}</svg>`}
 let fr=0,lt=0;function loop(ts){if(!q)return;const d=lt?Math.min(ts-lt,100):0;lt=ts;if(q.run&&!q.ask)q.ph+=d;const g=$("fg");if(g)g.innerHTML=fig();fr=requestAnimationFrame(loop)}
 let ac;function beep(f,ms){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=.12;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+ms/1000)}catch(e){}}
 const PRE=()=>+localStorage.getItem("sportx_prep")||5,setPre=s=>{localStorage.setItem("sportx_prep",s);q.prep=s;draw()};
