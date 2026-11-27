@@ -86,7 +86,7 @@ input:focus{outline:2px solid var(--a)}
 .sc.on{border-color:var(--a);box-shadow:0 0 0 3px #f5a52433}.sc:active{transform:scale(.97)}
 .ex-i{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex:none}
 .pl{margin-left:auto;width:38px;height:38px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;flex:none}.pl svg{width:16px;height:16px}
-.fg{background:#eef4f2;border-radius:16px;overflow:hidden}.fgc{background:var(--s);border-radius:22px;margin-top:14px;padding:10px 12px 12px;text-align:center}.fg svg{width:100%;max-width:300px;height:170px}.rd{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;margin-right:6px}
+.fg{background:#eef4f2;border-radius:16px;overflow:hidden;touch-action:none;cursor:grab}.fgc{background:var(--s);border-radius:22px;margin-top:14px;padding:10px 12px 12px;text-align:center}.fg svg{width:100%;max-width:300px;height:170px}.rd{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;margin-right:6px}
 .pr{font-size:96px;font-weight:800;line-height:1.1;color:var(--a);animation:pp 1s ease-out infinite}@keyframes pp{0%{transform:scale(1.5);opacity:0}30%{opacity:1}100%{transform:scale(1)}}
 .mdl{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;z-index:999;padding:24px}.mb{background:var(--s);border-radius:22px;padding:24px;max-width:340px;width:100%;text-align:center}.mb p{margin:10px 0 18px}
 .se-h{border-radius:24px;padding:14px 18px 22px;text-align:center;color:#fff}
@@ -570,21 +570,45 @@ MR=[[/escalador/,"climber","tq"],[/curl femoral|curl nórdico/,"hinge","q"],[/do
 [/salto|burpee|jumping|rana|cuerda|vallas|bloqueo|rebote/,"jump","qc"],[/sentadilla|prensa|hack|goblet|sumo|esquiador|aductores|abductores|cuádriceps/,"squat","q"],
 [/dribleo|tiro|lanzamiento|saque|remate|golpeo|dedos|antebrazo|bandeja|boxeo|pase.*mano|pases de pecho|recepción|reacción|rotación externa|autopases/,"arm","b"]];
 function mvOf(n){n=n.toLowerCase();for(const[r,m,u]of MR)if(r.test(n))return[m,u];return["run","qc"]}
+/* ---------- Muñequito 3D: arrastra para girar, pellizca para acercar ---------- */
+const cam={yaw:0,el:0,zm:1},ptr={},LZ=[0,0,0,5,6,-5,-6,11,11,-11,-11],Z0=v=>Math.max(-1,Math.min(1,v));
+addEventListener("pointerdown",ev=>{if(ev.target.closest&&ev.target.closest("#fg"))ptr[ev.pointerId]=[ev.clientX,ev.clientY]});
+addEventListener("pointerup",ev=>{delete ptr[ev.pointerId]});addEventListener("pointercancel",ev=>{delete ptr[ev.pointerId]});
+addEventListener("pointermove",ev=>{const o=ptr[ev.pointerId];if(!o)return;const ks=Object.keys(ptr);
+if(ks.length==2){const a=ks.map(k=>ptr[k]),d0=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);ptr[ev.pointerId]=[ev.clientX,ev.clientY];const b=ks.map(k=>ptr[k]),d1=Math.hypot(b[0][0]-b[1][0],b[0][1]-b[1][1]);if(d0>5)cam.zm=Math.max(.6,Math.min(2.2,cam.zm*d1/d0));return}
+cam.yaw+=(ev.clientX-o[0])*.7;cam.el=Math.max(-10,Math.min(80,cam.el+(ev.clientY-o[1])*.4));ptr[ev.pointerId]=[ev.clientX,ev.clientY]});
+addEventListener("wheel",ev=>{if(ev.target.closest&&ev.target.closest("#fg")){ev.preventDefault();cam.zm=Math.max(.6,Math.min(2.2,cam.zm*Math.exp(-ev.deltaY*.001)))}},{passive:false});
+const setV=v=>{const d=q&&q.fd||1,t={s:[0,0],f:[-90*d,0],b:[90*d,0],a:[0,62]}[v];cam.yaw=t[0];cam.el=t[1];cam.zm=1};
 function fig(){const t=(q.ph/1100)%2,u=t<1?t:2-t,e=(1-Math.cos(Math.PI*u))/2,[A,B]=M[q.m],p=A.map((a,k)=>a+(B[k]-a)*e),X=k=>p[2*k],Y=k=>p[2*k+1],f=v=>v.toFixed(1),
-lying=/pushup|plank|climber/.test(q.m),sup=/crunch|bridge/.test(q.m),d=(!sup&&X(0)<X(2)-20)?-1:1,
-L=(a,b,w,c,o)=>`<line x1="${f(a[0])}" y1="${f(a[1])}" x2="${f(b[0])}" y2="${f(b[1])}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"${o?` opacity="${o}"`:""}/>`,
-P_=k=>[X(k),Y(k)],md=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],R=()=>"",OL="#5d626d",
-H=P_(0),N=P_(1),Pp=P_(2),SKN="#f1c6a4",SKD="#e0a684",SHIRT="#1b1d21",SHIRT2="#2c2f35",NAVY="#183c55",HAIR="#17384e";
-const leg=(kk,ff,far)=>{const k=P_(kk),fo=P_(ff),sk=far?SKD:SKN,sx=lying?0:d*9;
-return L(Pp,k,14,sk)+L(Pp,md(Pp,k,.62),16,far?"#12293b":NAVY)+L(k,fo,10,sk)+L(fo,[fo[0]+sx,fo[1]],8,far?"#0f2433":"#12303f")+(lying?"":L([fo[0]-2,fo[1]+3.6],[fo[0]+sx+1,fo[1]+3.6],2,"#dfe8ec"))+R(Pp,k,14,"q",far)+R(k,fo,9.5,"c",far)},
-arm=(ee,hh,far)=>{const e_=P_(ee),h_=P_(hh),sl=far?"#3d414a":"#2c2f36";return L(N,e_,12.8,OL)+L(e_,h_,10.8,OL)+L(N,e_,11,sl)+L(e_,h_,9,sl)+`<circle cx="${f(h_[0])}" cy="${f(h_[1])}" r="5.6" fill="${far?SKD:SKN}"/>`+R(N,e_,11,"b",far)+R(e_,h_,9,"b",far)};
-const hx=H[0],hy=H[1],hd=`<g transform="translate(${f(hx)} ${f(hy)}) scale(1.22) translate(${f(-hx)} ${f(-hy)})"><circle cx="${f(hx-d*7)}" cy="${f(hy+3)}" r="3.2" fill="${SKD}"/><circle cx="${f(hx)}" cy="${f(hy)}" r="11.2" fill="${SKN}"/>
-<path d="M${f(hx-12.4)} ${f(hy-1)}A12.4 12.4 0 0 1 ${f(hx+12.4)} ${f(hy-1)}Q${f(hx+d*6)} ${f(hy-6)} ${f(hx-d*1)} ${f(hy-4)}Z" fill="${HAIR}"/><circle cx="${f(hx+d*4.5)}" cy="${f(hy-10.5)}" r="7" fill="${HAIR}"/><circle cx="${f(hx-d*8)}" cy="${f(hy-1)}" r="4.8" fill="${HAIR}"/>
-<path d="M${f(hx+d*3)} ${f(hy-3.6)}L${f(hx+d*9)} ${f(hy-4.6)}" stroke="${HAIR}" stroke-width="1.8" stroke-linecap="round"/><circle cx="${f(hx+d*6.3)}" cy="${f(hy-.3)}" r="1.5" fill="#14202b"/>
-<path d="M${f(hx+d*10.6)} ${f(hy-.5)}L${f(hx+d*14)} ${f(hy+3.8)}L${f(hx+d*10.4)} ${f(hy+4.6)}Z" fill="${SKN}" stroke="${SKD}" stroke-width=".8" stroke-linejoin="round"/><path d="M${f(hx+d*5)} ${f(hy+6.8)}L${f(hx+d*8.6)} ${f(hy+6.8)}" stroke="#b66a55" stroke-width="1.4" stroke-linecap="round"/></g>`;
-let s=`<svg viewBox="0 0 200 150"><ellipse cx="${f((X(1)+X(4)+X(6))/3)}" cy="141" rx="64" ry="4.5" fill="#7fa9ba" opacity=".6"/><ellipse cx="156" cy="22" rx="20" ry="7" fill="#a9c8d4"/><ellipse cx="30" cy="30" rx="13" ry="5" fill="#a9c8d4"/>`;
-s+=leg(5,6,1)+arm(9,10,1)+L(N,Pp,31,OL)+L(N,Pp,29,SHIRT)+L(md(N,Pp,.18),md(N,Pp,.18),0,"none")+R(N,Pp,29,"t",0)+L(N,md(N,H,.8),8.5,SKN)+`<circle cx="${f(Pp[0])}" cy="${f(Pp[1])}" r="15" fill="${NAVY}"/>`+leg(3,4,0)+arm(7,8,0)+hd;
-return s+"</svg>"}
+lying=/pushup|plank|climber/.test(q.m),sup=/crunch|bridge/.test(q.m),d=(!sup&&X(0)<X(2)-20)?-1:1;q.fd=d;
+const yw=cam.yaw*Math.PI/180,el=cam.el*Math.PI/180,cY=Math.cos(yw),sY=Math.sin(yw),cP=Math.cos(el),sP=Math.sin(el),
+rv=(x,y,z)=>{const xr=x*cY+z*sY,zr=-x*sY+z*cY;return[xr,y*cP-zr*sP,y*sP+zr*cP]},
+pr=a=>{const[x,y,z]=rv(a[0]-100,a[1]-78,a[2]),k=cam.zm*(1+z*.0025);return[100+x*k,78+y*k,z,k]},
+SKN="#f1c6a4",SKD="#e0a684",NAVY="#183c55",HAIR="#17384e",SHIRT="#1b1d21",OL="#5d626d",I=[],
+add=(z,s)=>I.push([z,s]),
+L=(pa,pb,w,c)=>`<line x1="${f(pa[0])}" y1="${f(pa[1])}" x2="${f(pb[0])}" y2="${f(pb[1])}" stroke="${c}" stroke-width="${f(w*(pa[3]+pb[3])/2)}" stroke-linecap="round"/>`,
+seg=(a,b,w,c,ez=0,ol)=>{const pa=pr(a),pb=pr(b),z=(pa[2]+pb[2])/2+ez;if(ol)add(z-.001,L(pa,pb,w+1.8,ol));add(z,L(pa,pb,w,c))},
+lp=(a,b,t)=>a.map((v,k)=>v+(b[k]-v)*t),P3=k=>[X(k),Y(k),LZ[k]],
+hipP=sg=>[X(2),Y(2),5*sg],shP=sg=>[X(1),Y(1),9*sg];
+[[3,4,1],[5,6,-1]].forEach(([kk,ff,sg])=>{const hp=hipP(sg),kn=P3(kk),fo=P3(ff),nr=sg>0?0:1,md=pr(lp(hp,fo,.5))[2]>0,sk=md?SKN:SKD,sx=lying?0:d*9;
+seg(hp,kn,14,sk);seg(hp,lp(hp,kn,.62),16,md?NAVY:"#12293b",.02);seg(kn,fo,10,sk);seg(fo,[fo[0]+sx,fo[1],fo[2]],8,md?"#12303f":"#0f2433",.02);
+if(!lying)seg([fo[0]-2,fo[1]+3.6,fo[2]],[fo[0]+sx+1,fo[1]+3.6,fo[2]],2,"#dfe8ec",.03)});
+[[7,8,1],[9,10,-1]].forEach(([ee,hh,sg])=>{const s=shP(sg),el_=P3(ee),ha=P3(hh),pa=pr(lp(s,ha,.5)),md=pa[2]>0,c=md?"#2c2f36":"#3d414a";
+seg(s,el_,11,c,0,OL);seg(el_,ha,9,c,0,OL);const ph=pr(ha);add(ph[2]+.04,`<circle cx="${f(ph[0])}" cy="${f(ph[1])}" r="${f(5.6*ph[3])}" fill="${md?SKN:SKD}"/>`)});
+const N=[X(1),Y(1),0],Pp=[X(2),Y(2),0],H=P3(0),pt=pr(lp(N,Pp,.5))[2];
+seg(N,Pp,31,SHIRT,0,OL);const pp=pr(Pp);add(pt+.02,`<circle cx="${f(pp[0])}" cy="${f(pp[1])}" r="${f(15*pp[3])}" fill="${NAVY}"/>`);
+seg(N,lp(N,H,.8),8.5,SKN,.03);
+const C=pr(H),r=13.7*C[3],Fv=rv(d,0,0),Rv=rv(0,0,1),fa=Z0(Fv[2]),fx=Fv[0],fy=Fv[1],rx=Rv[0],ry=Rv[1],ci=(x,y,rr,c,o)=>`<circle cx="${f(x)}" cy="${f(y)}" r="${f(rr)}" fill="${c}"${o!=null&&o<1?` opacity="${o.toFixed(2)}"`:""}/>`,
+ln=(x1,y1,x2,y2,w,c)=>`<line x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}" stroke="${c}" stroke-width="${f(w)}" stroke-linecap="round"/>`,
+cx=C[0],cyy=C[1],vis=Math.max(0,Math.min(1,(fa+.25)*2.5));let hd=ci(cx,cyy,r*.82,SKN);
+[1,-1].forEach(s=>{hd+=ci(cx+rx*s*.95*r-fx*.5*r,cyy+ry*s*.95*r-fy*.5*r+.2*r,.24*r,SKD)});
+if(fa<0)hd+=ci(cx,cyy,r*.86,HAIR,Math.min(1,-fa*2.5));
+hd+=`<ellipse cx="${f(cx)}" cy="${f(cyy-.42*r)}" rx="${f(.9*r)}" ry="${f(.55*r)}" fill="${HAIR}"/>`+ci(cx+fx*.3*r,cyy-.78*r,.5*r,HAIR)+ci(cx-fx*.62*r,cyy+.02*r,.36*r,HAIR);
+if(vis>0){[1,-1].forEach(s=>{const ex=cx+fx*.5*r+rx*s*.34*r,ey=cyy+fy*.5*r+ry*s*.34*r-.02*r;hd+=ci(ex,ey,.11*r,"#14202b",vis)+ln(ex-fx*.1*r,ey-.3*r,ex+fx*.28*r+rx*s*.08*r,ey-.34*r,.14*r,HAIR)});
+hd+=ci(cx+fx*.84*r,cyy+fy*.84*r+.2*r,.15*r,SKN,vis)+ln(cx+fx*.45*r-rx*.2*r,cyy+fy*.45*r+.5*r,cx+fx*.45*r+rx*.2*r,cyy+fy*.45*r+.5*r,.1*r,"#b66a55")}
+add(C[2]+.6,hd);
+I.sort((a,b)=>a[0]-b[0]);const sh=pr([100,141,0]);
+return`<svg viewBox="0 0 200 150"><ellipse cx="156" cy="22" rx="20" ry="7" fill="#a9c8d4"/><ellipse cx="30" cy="30" rx="13" ry="5" fill="#a9c8d4"/><ellipse cx="${f(sh[0])}" cy="${f(sh[1])}" rx="${f(64*cam.zm)}" ry="${f(Math.max(4.5,64*cam.zm*Math.abs(sP)))}" fill="#7fa9ba" opacity=".6"/>${I.map(x=>x[1]).join("")}</svg>`}
 let fr=0,lt=0;function loop(ts){if(!q)return;const d=lt?Math.min(ts-lt,100):0;lt=ts;if(q.run&&!q.ask)q.ph+=d;const g=$("fg");if(g)g.innerHTML=fig();fr=requestAnimationFrame(loop)}
 let ac;function beep(f,ms){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=.12;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+ms/1000)}catch(e){}}
 const PRE=()=>+localStorage.getItem("sportx_prep")||5,setPre=s=>{localStorage.setItem("sportx_prep",s);q.prep=s;draw()};
@@ -592,12 +616,12 @@ const RS=SV+'<path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>',MU={q:"Piernas y g
 function askRs(){q.was=q.run;q.run=false;q.ask=true;draw()}
 function noRs(){q.ask=false;q.run=q.was;draw()}
 function okRs(){q.s=1;q.r=0;q.t=0;q.rest=0;q.ask=false;q.run=true;q.prep=PRE();draw()}
-function start(i){const[m,u]=mvOf(E[i].n);q={e:E[i],s:1,r:0,t:0,rest:0,run:true,prep:PRE(),m,u,ph:0};$("ses").style.display="block";clearInterval(tm);tm=setInterval(tick,1000);cancelAnimationFrame(fr);lt=0;fr=requestAnimationFrame(loop);draw()}
+function start(i){const[m,u]=mvOf(E[i].n);q={e:E[i],s:1,r:0,t:0,rest:0,run:true,prep:PRE(),m,u,ph:0};cam.yaw=0;cam.el=0;cam.zm=1;$("ses").style.display="block";clearInterval(tm);tm=setInterval(tick,1000);cancelAnimationFrame(fr);lt=0;fr=requestAnimationFrame(loop);draw()}
 function tick(){if(!q||!q.run)return;if(q.prep>0){q.prep--;beep(q.prep?660:990,q.prep?90:300);if(!q.prep)navigator.vibrate&&navigator.vibrate(300)}else if(q.rest>0){if(--q.rest==0){q.s++;q.r=0;navigator.vibrate&&navigator.vibrate(200)}}else q.t++;draw()}
 function rep(){if(q.prep>0||q.rest>0)return;if(++q.r>=q.e.r){if(q.s>=q.e.s)return fin();q.rest=q.e.d}draw()}
 function draw(){const{e,s,r,t,rest,prep}=q;
 $("ses").innerHTML=`<div class="app"><div class="se-h ph ph-${e.sp}"><button class="se-x" onclick="quit()">‹ Salir</button><div><span class="se-ic">${e.ic}</span><h1>${e.n}</h1><p>${e.t}</p></div></div>
-<div class="fgc"><div id="fg" class="fg">${fig()}</div><p class="m"><i class="rd"></i>Músculos: ${[...q.u].map(k=>MU[k]).join(" · ")}</p></div>
+<div class="fgc"><div id="fg" class="fg">${fig()}</div><div class="chips" style="justify-content:center;margin-top:8px"><button class="chip" onclick="setV('s')">Lado</button><button class="chip" onclick="setV('f')">Frente</button><button class="chip" onclick="setV('b')">Espalda</button><button class="chip" onclick="setV('a')">Arriba</button></div><p class="m" style="margin-top:8px"><i class="rd"></i>Músculos: ${[...q.u].map(k=>MU[k]).join(" · ")}</p><p class="m" style="font-size:12px">Arrastra para girar · pellizca para acercar</p></div>
 <div class="center">${prep>0?`<p class="st" style="font-size:20px;margin-bottom:0">¡Prepárate!</p><div class="pr">${prep}</div><p class="m">Colócate en posición, empezamos en ${prep} s</p><div class="chips" style="justify-content:center;margin:12px 0"><button class="chip ${PRE()==5?"on":""}" onclick="setPre(5)">5 s</button><button class="chip ${PRE()==10?"on":""}" onclick="setPre(10)">10 s</button></div><button class="btn" onclick="q.prep=0;draw()">Empezar ya</button>`
 :`<div class="timer">${mm(rest>0?rest:t)}</div><p class="st">${rest>0?"Descansa, la siguiente serie ya viene":q.run?"En marcha":"En pausa"}</p>
 <div class="se-dots">${Array.from({length:e.s},(_,k)=>`<i class="${k<s-1?"dn":k==s-1?"cur":""}"></i>`).join("")}</div>
